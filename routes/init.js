@@ -7,6 +7,9 @@ const pool = new Pool({
   //ssl: true
 });
 
+// Global Variable
+var sess = {};
+
 function initRouter(app) {
 	/* GET */
   app.get('/', function(req, res, next) {
@@ -24,6 +27,7 @@ function initRouter(app) {
 app.get('/test_insert', function(req, res, next) {
 	res.render('test_insert', { title: 'Insert' });
 });
+
 //  have to add test_insert to the ejs form
 app.post('/test_insert', function(req, res, next) {
 	// Retrieve Information
@@ -42,7 +46,92 @@ app.post('/test_insert', function(req, res, next) {
 });
 
   // add all app.get app.post things here
+
+
+// GET for login
+app.get('/login', function(req, res, next) {
+	if (sess["uid"] != null) {
+		res.redirect('/about')
+	} else {
+		res.render('login', { title: 'Login' });
+	}
+});
+
+// POST for login
+app.post('/login', function(req, res, next) {
+	var uid = req.body.uid;
+	var password = req.body.password;
+
+	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
+		if (err) {
+			res.redirect('/relog')
+		} else if (result.rows[0] == null) {
+			res.redirect('/relog')
+		} else {
+			if (result.rows[0].password == [password]) {
+				pool.query('SELECT "aid" FROM Administrator WHERE "aid" = $1', [uid], (err, result1) => {
+					sess = req.body;
+					sess["uid"] = uid;
+					if (result1.rows[0] == null) {
+						res.redirect('/about')
+					} else {
+						res.redirect('/index')
+					}
+				});
+			} else {
+				res.redirect('/relog')
+			}
+		}
+	});
+});
+
+// Get for About
+app.get('/about', function(req, res, next) {
+ try {
+	if (sess.uid != null) {
+		res.render('about', { title: 'About' });
+	}
+ } 
+ catch(err) {
+	res.redirect('/login')
+ }
+});
+
+// GET for Relog
+app.get('/relog', function(req, res, next) {
+	res.render('relog', { title: 'Login' });
+});
+
+// POST for Relog
+app.post('/', function(req, res, next) {
+	var uid = req.body.uid;
+	var password = req.body.password;
+
+	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
+		if (err) {
+			res.redirect('/relog')
+		} else if (result.rows[0] == null) {
+			res.redirect('/relog')
+		} else {
+			if (result.rows[0].password == [password]) {
+				pool.query('SELECT "aid" FROM Administrator WHERE "aid" = $1', [uid], (err, result1) => {
+					sess = req.body;
+					sess.uid = uid;
+					if (result1.rows[0] == null) {
+						res.redirect('/about')
+					} else {
+						res.redirect('/index')
+					}
+				});
+			} else {
+				res.redirect('/relog')
+			}
+		}
+	});
+});
 }
+
+
 
 
 module.exports = initRouter;
