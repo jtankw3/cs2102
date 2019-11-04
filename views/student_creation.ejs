@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('admin_nav') %>
+
+    <!-- Page Title -->
+    <title>Add/Edit Students</title>
+
+    <!-- CSS for Styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <!-- JavaScript for Interactivity -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <!-- ADDED JavaScript -->
+    <!-- <script src="javascripts/insertcourseScript.js"></script> -->
+
+</head>
+<body>
+
+<h1>Admin: <%= title%></h1>
+<form id="html_form" action="student_creation" role="form" method="post">
+    <div class="form-group">
+        <label for="sid">Student ID</label>
+        <input type="text" class="form-control" id="sid" name="sid" aria-describedby="sidHelp" placeholder="Enter student ID">
+        <small id="cidHelp" class="form-text text-muted">E.g. A0123456D</small>
+    </div>
+    <div class="form-group">
+        <label for="e_year">Enrolled Year</label>
+        <input type="text" class="form-control" id="e_year" name="e_year" placeholder="Enter enrolled year">
+    </div>
+    <div class="form-group">
+        <label for="dname1">Degree Name 1</label>
+        <input type="text" class="form-control" id="dname1" name="dname1" placeholder="Enter degree name 1">
+    </div>
+    <div class="form-group">
+        <label for="dname2">Degree Name 2</label>
+        <input type="text" class="form-control" id="dname2" name="dname2" placeholder="Enter degree name 2">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    (function() {
+        window.addEventListener('load', function() {
+            var forms = [document.getElementById('html_form')];
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', check, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html>
