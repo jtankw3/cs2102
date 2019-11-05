@@ -16,54 +16,20 @@ var reg_round;
 function initRouter(app) {
 	/* GET */
   app.get('/', function(req, res, next) {
-			pool.query(sql_query.query.get_period, (err, data) => {
-				if (data.rows[0] == null) {
-					res.redirect('/closed');
-				} else {
-					acad_year = data.rows[0].a_year;
-					semester =  data.rows[0].semester;
-					reg_round = data.rows[0].a_year;
-				}
+		getCurrentRound(app);
+		if (acad_year == null) {
+			res.render('index', { title: 'RegMod',
+				message: 'There is no ongoing round.' });
+		} else {
+			res.render('index', { title: 'RegMod',
+				message: "Currently ongoing: AY" + acad_year + " Sem " + semester
+				+ " Round " + reg_round});
+		}
 		});
-		  res.render('index', { title: 'RegMod', a_year: acad_year,
-			semester: semester, round: reg_round});
-	});
-
-  /* All select operations can use this template */
-  app.get('/test_select', function(req, res, next) {
-  	pool.query(sql_query.query.find_user, (err, data) => {
-  		res.render('test_select', { title: 'Select', data: data.rows });
-  	});
-  });
 
 	app.get('/', function(req, res, next) {
 		res.render('index', { title: 'ModReg'});
 	});
-
-	/* All insert operations can use this template */
-	app.get('/test_insert', function(req, res, next) {
-		res.render('test_insert', { title: 'Insert' });
-	});
-
-	//  have to add test_insert to the ejs form
-	app.post('/test_insert', function(req, res, next) {
-		// Retrieve Information
-		var uid  = req.body.uid;
-		var name    = req.body.name;
-		var password = req.body.password;
-
-	  pool.query(sql_query.query.add_user, [uid, name, password], (err, data) => {
-	    if(err) {
-	      console.error("Error in adding user");
-	      res.redirect('/test_insert');
-	    } else {
-	      res.redirect('/test_select');
-	    }
-	  });
-	});
-
-	// add all app.get app.post things here
-
 
 // GET for login
 app.get('/login', function(req, res, next) {
@@ -117,31 +83,47 @@ app.get('/login', function(req, res, next) {
 	});
 
 	app.get('/admin_allocate_search', function(req, res, next) {
-			res.render('admin_allocate_search', { title: 'Allocated Students' });
+			res.render('admin_allocate_search', { title: 'Allocated Students',
+		subtext: "" });
 	});
 
 
 	app.post('/admin_allocate_search', function(req, res, next) {
-		pool.query(sql_query.query.allocated_students,[req.body.cid, acad_year,semester],
+		var cid = req.body.cid.toUpperCase();
+		var a_year = req.body.a_year.toUpperCase();
+		var semester = req.body.semester.toUpperCase();
+		pool.query(sql_query.query.allocated_students, [cid, a_year, semester],
 			(err, data) => {
-				res.render('admin_allocate_select', { title: req.body.cid,
-					data: data.rows });
+				if (err) {
+					res.render('admin_allocate_search', { title: 'Allocated Students',
+					subtext: "An error occured, please check your input and try again." });
+				} else {
+				res.render('admin_allocate_select', { course: cid,
+					a_year: a_year, semester: semester, data: data.rows });
+				}
 			});
 	});
 
 	app.get('/admin_allocate_select', function(req, res, next) {
-		pool.query(sql_query.query.allocated_students,[req.query.cid, acad_year,semester],
+		pool.query(sql_query.query.allocated_students,[req.query.cid,
+			req.query.a_year,req.query.semester],
 			(err, data) => {
-				res.render('admin_allocate_select', { title: req.query.cid,
+				res.render('admin_allocate_select', { course: req.query.cid,
+					a_year: req.query.a_year, semester: req.query.semester,
 					data: data.rows });
 			});
 	});
 
 	app.post('/delete_allocate', function(req, res, next) {
-		pool.query(sql_query.query.delete_allocated_students,[req.query.cid,
-			acad_year,semester],
+		var a_year  = req.query.a_year.toUpperCase();
+		var sem  = req.query.semester.toUpperCase();
+		var sid  = req.query.sid.toUpperCase();
+		var cid  = req.query.cid.toUpperCase();
+
+		pool.query(sql_query.query.delete_allocated_students,[cid, sid],
 			(err, data) => {
-				res.redirect('/admin_allocate_select')
+				res.redirect('/admin_allocate_select?cid=' + cid
+			+"&a_year=" + a_year + "&semester=" + sem);
 			});
 	});
 
@@ -153,19 +135,24 @@ app.get('/login', function(req, res, next) {
 	});
 
 	app.get('/admin_allocate_insert', function(req, res, next) {
-		res.render('admin_allocate_insert');
+		res.render('admin_allocate_insert', {subtext: ""});
 	});
 
 	app.post('/admin_allocate_insert', function(req, res, next) {
-		var sid  = req.body.sid;
-		var cid    = req.body.cid;
+		var a_year  = req.body.a_year.toUpperCase();
+		var sem  = req.body.semester.toUpperCase();
+		var sid  = req.body.sid.toUpperCase();
+		var cid  = req.body.cid.toUpperCase();
 
-	  pool.query(sql_query.query.add_user, [uid, name, password], (err, data) => {
+	  pool.query(sql_query.query.add_allocated_students,
+				[sid, cid, a_year, sem], (err, data) => {
 	    if(err) {
-	      console.error("Error in adding user");
-	      res.redirect('/admin_allocate_insert');
-	    } else {
-	      res.redirect('/admin_allocate_select?cid=' + cid);
+	      console.error(err['detail']);
+				res.render('admin_allocate_insert', {
+					subtext: "An error occured, please check your input and try again."});
+			} else {
+	    res.redirect('/admin_allocate_select?cid=' + cid
+		+"&a_year=" + a_year + "&semester=" + sem);
 			}
 		});
 	});
@@ -377,6 +364,14 @@ app.get('/about', function(req, res, next) {
 	});
 };
 
-
+function getCurrentRound(app) {
+	pool.query(sql_query.query.get_period, (err, data) => {
+		if(data.rows != null){
+			acad_year = data.rows[0].a_year;
+			semester =  data.rows[0].semester;
+			reg_round = data.rows[0].round;
+		}
+	});
+};
 
 module.exports = initRouter;

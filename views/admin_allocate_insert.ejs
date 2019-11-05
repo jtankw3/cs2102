@@ -16,11 +16,20 @@
   </head>
   <body>
     <h1>Allocate Student to a Course</h1>
-		<form id="html_form" action="admin_allocate_insert" role="form" method="post">
-			<div class="form-group">
-				<label for="sid">Student ID</label>
-				<input type="text" class="form-control" id="sid" name="sid" aria-describedby="matricHelp" placeholder="Enter Student ID of student to be added">
+    <p style="color: red"><%= subtext%></p>
+    <form id="html_form" action="admin_allocate_insert" role="form" method="post">
+      <div class="form-group">
+        <label for="name">Academic Year</label>
+        <input type="text" class="form-control" id="a_year" name="a_year" placeholder="Enter the Academic Year">
+      </div>
+      <div class="form-group">
+				<label for="sid">Semester</label>
+				<input type="text" class="form-control" id="semester" name="semester" placeholder="Enter the semester">
 			</div>
+      <div class="form-group">
+        <label for="name">Student ID</label>
+        <input type="text" class="form-control" id="sid" name="sid" placeholder="Enter the Student ID to add">
+      </div>
 			<div class="form-group">
 				<label for="name">Course</label>
 				<input type="text" class="form-control" id="cid" name="cid" placeholder="Enter Course ID">

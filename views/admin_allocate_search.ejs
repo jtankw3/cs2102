@@ -4,7 +4,7 @@
     <%- include('admin_nav') %>
 		<!-- Page Title -->
     <title>Allocated Students</title>
-    
+
 		<!-- CSS for Styling -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
@@ -16,10 +16,18 @@
   </head>
   <body>
     <h1><%= title%></h1>
+    <p style="color: red"><%= subtext%></p>
 		<form id="html_form" action="admin_allocate_search" role="form" method="post">
-			<div class="form-group">
-				<label for="uid">Search for students allocated course</label>
-				<input type="text" class="form-control" id="cid" name="cid" aria-describedby="matricHelp" placeholder="Enter the course to search">
+      <div class="form-group">
+        <label for="cid">Search for students who were allocated this course</label>
+        <input type="text" class="form-control" id="cid" name="cid" aria-describedby="matricHelp" placeholder="Enter the course to search">
+      </div><div class="form-group">
+				<label for="a_year">Academic Year</label>
+				<input type="text" class="form-control" id="a_year" name="a_year" aria-describedby="matricHelp" placeholder="Enter the Academic Year">
+			</div>
+      <div class="form-group">
+				<label for="semester">Semester</label>
+				<input type="text" class="form-control" id="semester" name="semester" aria-describedby="matricHelp" placeholder="Enter the semester">
 			</div>
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>

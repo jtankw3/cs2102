@@ -3,7 +3,7 @@
   <head>
     <%- include('admin_nav') %>
     <!-- Page Title -->
-    <title>List of students allocated <%=title%></title>
+    <title>List of students allocated <%= course%></title>
 
 		<!-- CSS for Styling -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -14,7 +14,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
   </head>
   <body>
-    <h1>List of students allocated <%=title%></h1>
+    <h1>List of students allocated <%=course%> in AY<%=a_year%> Sem <%=semester%></h1>
 		<table class="table">
 			<thead>
 				<tr>
@@ -23,6 +23,7 @@
           <th scope="col">First Degree</th>
           <th scope="col">Second Degree</th>
           <th scope="col">Enrollment Year</th>
+          <th scope="col">Delete</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -33,12 +34,13 @@
 					<td><%= data[i].dname1%></td>
 					<td><%= data[i].dname2%></td>
 					<td><%= data[i].e_year%></td>
-          <td><form action="delete_allocate?sid=<%= data[i].sid %>&cid=<%=title  %>" method="post">
-          <input type="submit" name="delete_allocate" value="X" /></td>
+          <td><form action="delete_allocate?sid=<%= data[i].sid %>&cid=<%= course %>&a_year=<%= a_year%>&semester=<%= semester%>" method="post">
+          <input type="submit" name="delete_allocate" value="X" /></form></td>
 				</tr>
 				<% } %>
 			</tbody>
 		</table>
-    <form action="" method="post">
-    <input class="btn btn-primary" type="submit" name="admin_allocate_insert" value="Allocate students" />
-  </form>
+    <form style="margin:10px; display:inline" action="/admin_allocate_insert" method="get">
+    <input class="btn btn-primary btn-space" type="submit" name="admin_allocate_insert" value="Manually Allocate" /></form>
+    <form style="display:inline" action="/admin_allocate_auto?cid=<%= course %>" method="post">
+    <input class="btn btn-primary btn-space" type="submit" name="admin_allocate_auto" value="Run Allocation" /></form>
