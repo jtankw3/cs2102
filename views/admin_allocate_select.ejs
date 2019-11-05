@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-		<!-- Page Title -->
+    <%- include('admin_nav') %>
+    <!-- Page Title -->
     <title>List of students allocated <%=title%></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
 
 		<!-- CSS for Styling -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -40,5 +40,5 @@
 			</tbody>
 		</table>
     <form action="" method="post">
-    <input type="submit" name="admin_allocate_insert" value="Allocate students" />
+    <input class="btn btn-primary" type="submit" name="admin_allocate_insert" value="Allocate students" />
   </form>
