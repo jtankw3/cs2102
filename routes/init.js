@@ -10,45 +10,6 @@ const pool = new Pool({
 // Global Variable
 var sess = {};
 
-/*
-function initRouter(app) {
-	// GET
-  app.get('/', function(req, res, next) {
-		    res.render('index', { title: 'ModReg',});
-	});
-
-  // All select operations can use this template
-  app.get('/test_select', function(req, res, next) {
-  	//pool.query(sql_query.query.find_user, (err, data) => {
-	  pool.query("SELECT * FROM USERS", (err, data) => {
-  		res.render('test_select', { title: 'Select', data: data.rows });
-  	});
-  });
-
-// All insert operations can use this template
-app.get('/test_insert', function(req, res, next) {
-	res.render('test_insert', { title: 'Insert' });
-});
-
-//  have to add test_insert to the ejs form
-app.post('/test_insert', function(req, res, next) {
-	// Retrieve Information
-	var uid  = req.body.uid;
-	var name    = req.body.name;
-	var password = req.body.password;
-
-  //pool.query(sql_query.query.add_user, [uid, name, password], (err, data) => {
-	pool.query("INSERT INTO users VALUES('" + uid + "','" + name + "','" + password + "')", (err, data) => {
-    if(err) {
-      console.error("Error in adding user");
-      res.redirect('/test_insert');
-    } else {
-      res.redirect('/test_select');
-    }
-  });
-});
-
-*/
 function initRouter(app) {
 	/* GET */
 	app.get('/', function(req, res, next) {
@@ -100,29 +61,30 @@ app.post('/login', function(req, res, next) {
 	var uid = req.body.uid;
 	var password = req.body.password;
 
-	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
-		if (err) {
-			res.redirect('/relog')
-		} else if (result.rows[0] == null) {
-			res.redirect('/relog')
+	pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
+		if (result.rows[0] == null) {
+			pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
+				if (result1.rows[0] == null) {
+					res.redirect('/relog')
+				} else if (result1.rows[0].password == [password]) {
+					sess.uid = uid;
+					sess.type = "student"
+					res.redirect('/student_homepage')
+				} else {
+					res.redirect('/relog')
+				}
+			});
 		} else {
 			if (result.rows[0].password == [password]) {
-				pool.query('SELECT "aid" FROM Administrators WHERE "aid" = $1', [uid], (err, result1) => {
-					sess = req.body;
-					sess["uid"] = uid;
-					//sess = req.body;
-					sess.uid = uid;
-					if (result1.rows[0] == null) {
-						res.redirect('/student_homepage')
-					} else {
-						res.redirect('/admin_homepage')
-					}
-				});
+				sess.uid = uid;
+				sess.type = "admin"
+				res.redirect('/admin_homepage')
 			} else {
 				res.redirect('/relog')
 			}
 		}
 	});
+
 });
 // GET for Admin
 app.get('/admin_homepage', function(req, res, next) {
@@ -178,7 +140,6 @@ app.post('/relog', function(req, res, next) {
 		}
 	});
 });
-<<<<<<< HEAD
 
 // GET for Course Creation
 	app.get('/course_creation', function(req, res, next) {
@@ -244,15 +205,14 @@ app.post('/relog', function(req, res, next) {
 		res.render('student_creation', { title: 'Creating/Editing Students' });
 	});
 
-// POST for Student Creation
 	app.post('/student_creation', function(req, res, next) {
 		// Retrieve Information
 		var sid  = req.body.sid;
-		var e_year = req.body.e_year;
+		var e_year  = req.body.e_year;
 		var dname1 = req.body.dname1;
 		var dname2 = req.body.dname2;
 
-		pool.query(sql_query.query.add_students, [sid, e_year, dname1, dname2], (err, data) => {
+		pool.query(sql_query.query.create_student, [sid, e_year, dname1, dname2], (err, data) => {
 			res.redirect('/student')
 		});
 	});
@@ -274,7 +234,7 @@ app.post('/relog', function(req, res, next) {
 		// Retrieve Information
 		var aid  = req.body.aid;
 
-		pool.query(sql_query.query.add_admin, [aid], (err, data) => {
+		pool.query(sql_query.query.create_admin, [aid], (err, data) => {
 			res.redirect('/admin')
 		});
 	});
@@ -301,16 +261,6 @@ app.post('/relog', function(req, res, next) {
 		pool.query(insert_query, (err, data) => {
 			res.redirect('/student_homepage')
 		});
-
-		/*pool.query(sql_query.query.course_add, [sid, cid], (err, data) => {
-			if(err){
-				console.error("Error in adding user");
-				res.redirect('/login')
-			}
-			else {
-				res.redirect('/about')
-			}
-		});*/
 	});
 
 	// GET for View degree requirements

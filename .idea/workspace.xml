@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="39c5e2a2-4617-471f-988f-09f150b6b338" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/course_registration.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/degree_requirements.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/drop_course.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/partials/head.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/partials/menu.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/partials/script.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/student_homepage.ejs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/views/view_course.ejs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/init.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/sql/index.js" afterDir="false" />
     </list>
@@ -47,12 +39,13 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="e43f58d3-8bf7-41d1-bd42-e4afd28d6726" name="Default Changelist" comment="" />
+      <changelist id="39c5e2a2-4617-471f-988f-09f150b6b338" name="Default Changelist" comment="" />
       <created>1572870877146</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1572870877146</updated>
       <workItem from="1572870879092" duration="12280000" />
+      <workItem from="1572929183398" duration="5610000" />
     </task>
     <servers />
   </component>
