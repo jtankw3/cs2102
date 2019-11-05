@@ -236,13 +236,20 @@ function initRouter(app) {
 	app.post('/student_creation', function(req, res, next) {
 		// Retrieve Information
 		var sid  = req.body.sid;
+		var sname = req.body.sname;
 		var e_year  = req.body.e_year;
 		var dname1 = req.body.dname1;
 		var dname2 = req.body.dname2;
 
-		pool.query(sql_query.query.create_student, [sid, e_year, dname1, dname2], (err, data) => {
-			res.redirect('/student')
-		});
+		if (dname2 == '') {
+			pool.query(sql_query.query.create_student, [sid, sname, e_year, dname1, null], (err, data) => {
+				res.redirect('/student')
+			});
+		} else {
+			pool.query(sql_query.query.create_student, [sid, sname, e_year, dname1, dname2], (err, data) => {
+				res.redirect('/student')
+			});
+		}
 	});
 
 	// GET for Student
@@ -355,7 +362,8 @@ function initRouter(app) {
 	});
 
 	app.get('/logout', function(req, res, next) {
-			sess["uid"] = null
+			sess.uid = null
+			sess.type = null
 			//res.render('', { title: 'Login' , subtext: 'Do not share your password with anyone!', error:''});
 			res.redirect('/')
 	});
