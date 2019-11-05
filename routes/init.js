@@ -13,32 +13,66 @@ var acad_year;
 var semester;
 var reg_round;
 
+
 function initRouter(app) {
-	/* GET */
-  app.get('/', function(req, res, next) {
+	// Landing Page Get
+	app.get('/', function(req, res, next) {
+		if (sess.uid != null) {
+			if (sess.type == "admin") {
+				res.redirect('/admin_homepage')
+			} else {
+				res.redirect('/student_homepage')
+			}
+		} else {
 			pool.query(sql_query.query.get_period, (err, data) => {
 				if (data.rows[0] == null) {
-					res.redirect('/closed');
+					res.render('index', {title: 'RegMod', message: 'There is no ongoing round.'})
 				} else {
 					acad_year = data.rows[0].a_year;
-					semester =  data.rows[0].semester;
+					semester = data.rows[0].semester;
 					reg_round = data.rows[0].a_year;
+					res.render('login', {title: 'RegMod Login', subtext: 'Do not share your password with anyone!', error: '',
+						message: "Currently ongoing: AY" + acad_year + " Sem " + semester + " Round " + reg_round });
 				}
+			});
+		}
+	});
+
+	// Landing Page Post
+	app.post('/', function(req, res, next) {
+		var uid = req.body.uid;
+		var password = req.body.password;
+		pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
+			if (result.rows[0] == null) {
+				pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
+					if (result1.rows[0] == null) {
+						res.render('', { title: 'Login', subtext: '', error: 'UID does not exist.'})
+					} else if (result1.rows[0].password == [password]) {
+						sess.uid = uid;
+						sess.type = "student"
+						res.redirect('/student_homepage')
+					} else {
+						res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.'})
+					}
+				});
+			} else {
+				if (result.rows[0].password == [password]) {
+					sess.uid = uid;
+					sess.type = "admin"
+					res.redirect('/admin_homepage')
+				} else {
+					res.render('', { title: 'Login', subtext: '', error: 'Wrong password'})
+				}
+			}
 		});
-		  res.render('index', { title: 'RegMod', a_year: acad_year,
-			semester: semester, round: reg_round});
 	});
 
-  /* All select operations can use this template */
-  app.get('/test_select', function(req, res, next) {
-  	pool.query(sql_query.query.find_user, (err, data) => {
-  		res.render('test_select', { title: 'Select', data: data.rows });
+ 	 /* All select operations can use this template */
+  	app.get('/test_select', function(req, res, next) {
+  		pool.query(sql_query.query.find_user, (err, data) => {
+  			res.render('test_select', { title: 'Select', data: data.rows });
+  		});
   	});
-  });
-
-	app.get('/', function(req, res, next) {
-		res.render('index', { title: 'ModReg'});
-	});
 
 	/* All insert operations can use this template */
 	app.get('/test_insert', function(req, res, next) {
@@ -63,58 +97,6 @@ function initRouter(app) {
 	});
 
 	// add all app.get app.post things here
-
-
-// GET for login
-app.get('/login', function(req, res, next) {
-	if (sess.uid != null) {
-		res.redirect('/index')
-	} else {
-		res.render('login', { title: 'Login', subtext: 'Do not share your password with anyone!', error: ''});
-	}
-});
-
-	// POST for login
-	app.post('/login', function(req, res, next) {
-		var uid = req.body.uid;
-		var password = req.body.password;
-		pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
-			if (result.rows[0] == null) {
-				pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
-					if (result1.rows[0] == null) {
-						res.render('login', { title: 'Login', subtext: '', error: 'UID does not exist.'})
-					} else if (result1.rows[0].password == [password]) {
-						sess.uid = uid;
-						sess.type = "student"
-						res.redirect('/student_homepage')
-					} else {
-						res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.'})
-					}
-				});
-			} else {
-				if (result.rows[0].password == [password]) {
-					sess.uid = uid;
-					sess.type = "admin"
-					res.redirect('/admin_homepage')
-				} else {
-					res.render('login', { title: 'Login', subtext: '', error: 'Wrong password'})
-				}
-			}
-		});
-	});
-
-
-	// Get for About
-	app.get('/about', function(req, res, next) {
-	 try {
-		if (sess.uid != null) {
-			res.render('about', { title: 'About' });
-		}
-	 }
-	 catch(err) {
-		res.redirect('/login')
-	 }
-	});
 
 	app.get('/admin_allocate_search', function(req, res, next) {
 			res.render('admin_allocate_search', { title: 'Allocated Students' });
@@ -170,28 +152,28 @@ app.get('/login', function(req, res, next) {
 		});
 	});
 
-// GET for Admin
-app.get('/admin_homepage', function(req, res, next) {
-	res.render('admin_homepage', { title: 'Admin Homepage' });
-});
+	// GET for Admin
+	app.get('/admin_homepage', function(req, res, next) {
+		res.render('admin_homepage', { title: 'Admin Homepage' });
+	});
 
-//GET for Student
-app.get('/student_homepage', function(req, res, next){
-	res.render('student_homepage', { title: 'Student Homepage' });
-});
+	//GET for Student
+	app.get('/student_homepage', function(req, res, next){
+		res.render('student_homepage', { title: 'Student Homepage' });
+	});
 
-// Get for About
-app.get('/about', function(req, res, next) {
-		res.render('about', { title: 'About' });
-});
+	// Get for Success
+	app.get('/success', function(req, res, next) {
+		res.render('success', { title: 'About' });
+	});
 
 
-// GET for Course Creation
+	// GET for Course Creation
 	app.get('/course_creation', function(req, res, next) {
 		res.render('course_creation', { title: 'Creating/Editing Course' });
 	});
 
-// POST for Course Creation
+	// POST for Course Creation
 	app.post('/course_creation', function(req, res, next) {
 		// Retrieve Information
 		var cid  = req.body.cid;
@@ -205,12 +187,13 @@ app.get('/about', function(req, res, next) {
 		});
 	});
 
-// GET for Courses
+	// GET for Courses
 	app.get('/courses', function(req, res, next) {
 		pool.query(sql_query.query.view_course, (err, data) => {
 			res.render('courses', { title: 'View Courses', data: data.rows });
 		});
 	});
+
 	app.get('/courses/delete/:cid', function(req, res, next) {
 		res.render('courses', { title: 'View Courses', data: data.rows });
 	});
@@ -221,12 +204,12 @@ app.get('/about', function(req, res, next) {
 		});
 	});
 
-// GET for Prereq Creation
+	// GET for Prereq Creation
 	app.get('/prereq_creation', function(req, res, next) {
 		res.render('prereq_creation', { title: 'Creating/Editing Prerequisites' });
 	});
 
-// POST for Prereq Creation
+	// POST for Prereq Creation
 	app.post('/prereq_creation', function(req, res, next) {
 		// Retrieve Information
 		var required_cid  = req.body.required_cid;
@@ -238,14 +221,14 @@ app.get('/about', function(req, res, next) {
 		});
 	});
 
-// GET for Prereq
+	// GET for Prereq
 	app.get('/prereq', function(req, res, next) {
 		pool.query(sql_query.query.view_prereq, (err, data) => {
 			res.render('prereq', { title: 'View Prerequisites', data: data.rows });
 		});
 	});
 
-// GET for Student Creation
+	// GET for Student Creation
 	app.get('/student_creation', function(req, res, next) {
 		res.render('student_creation', { title: 'Creating/Editing Students' });
 	});
@@ -262,19 +245,19 @@ app.get('/about', function(req, res, next) {
 		});
 	});
 
-// GET for Student
+	// GET for Student
 	app.get('/student', function(req, res, next) {
 		pool.query(sql_query.query.view_student, (err, data) => {
 			res.render('student', { title: 'View Students', data: data.rows });
 		});
 	});
 
-// GET for Admin Creation
+	// GET for Admin Creation
 	app.get('/admin_creation', function(req, res, next) {
 		res.render('admin_creation', { title: 'Creating/Editing Administrators' });
 	});
 
-// POST for Admin Creation
+	// POST for Admin Creation
 	app.post('/admin_creation', function(req, res, next) {
 		// Retrieve Information
 		var aid  = req.body.aid;
@@ -284,19 +267,19 @@ app.get('/about', function(req, res, next) {
 		});
 	});
 
-// GET for Admin
+	// GET for Admin
 	app.get('/admin', function(req, res, next) {
 		pool.query(sql_query.query.view_admin, (err, data) => {
 			res.render('admin', { title: 'View Administrators', data: data.rows });
 		});
 	});
 
-// GET for course_registration
+	// GET for course_registration
 	app.get('/course_registration', function(req, res, next) {
 		res.render('course_registration', { title: 'Course Registration' , error: ''});
 	});
 
-// POST for course_registration
+	// POST for course_registration
 	app.post('/course_registration', function(req, res, next) {
 		// Retrieve Information
 		var cid  = req.body.cid;
@@ -328,12 +311,12 @@ app.get('/about', function(req, res, next) {
 		});
 	});
 
-// GET for drop course
+	// GET for drop course
 	app.get('/drop_course', function(req, res, next) {
 		res.render('drop_course', { title: 'Drop Course' });
 	});
 
-// POST for drop course
+	// POST for drop course
 	var sql_query1 = 'DELETE FROM accept WHERE sid =';
 	app.post('/drop_course', function(req, res, next) {
 		// Retrieve Information
@@ -355,7 +338,7 @@ app.get('/about', function(req, res, next) {
 						res.redirect('/drop_course')
 					}
 					else {
-						res.redirect('/about', );
+						res.redirect('/success', );
 					}
 				});
 			}
@@ -373,10 +356,10 @@ app.get('/about', function(req, res, next) {
 
 	app.get('/logout', function(req, res, next) {
 			sess["uid"] = null
-			res.render('login', { title: 'Login' , subtext: 'Do not share your password with anyone!', error:''});
+			//res.render('', { title: 'Login' , subtext: 'Do not share your password with anyone!', error:''});
+			res.redirect('/')
 	});
+
 };
-
-
 
 module.exports = initRouter;
