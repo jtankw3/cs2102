@@ -29,6 +29,36 @@ function initRouter(app) {
 			semester: semester, round: reg_round});
 	});
 
+	// POST for login
+app.post('/login', function(req, res, next) {
+  var uid = req.body.uid;
+  var password = req.body.password;
+
+  pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
+    if (result.rows[0] == null) {
+      pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
+        if (result1.rows[0] == null) {
+          res.redirect('/relog')
+        } else if (result1.rows[0].password == [password]) {
+          sess.uid = uid;
+          sess.type = "student"
+          res.redirect('/student_homepage')
+        } else {
+          res.redirect('/relog')
+        }
+      });
+    } else {
+      if (result.rows[0].password == [password]) {
+        sess.uid = uid;
+        sess.type = "admin"
+        res.redirect('/admin_homepage')
+      } else {
+        res.redirect('/relog')
+      }
+    }
+  });
+});
+
   /* All select operations can use this template */
   app.get('/test_select', function(req, res, next) {
   	pool.query(sql_query.query.find_user, (err, data) => {
@@ -70,34 +100,6 @@ function initRouter(app) {
 		}
 	});
 
-	// POST for login
-	app.post('/login', function(req, res, next) {
-		var uid = req.body.uid;
-		var password = req.body.password;
-
-		pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
-			if (err) {
-				res.redirect('/relog')
-			} else if (result.rows[0] == null) {
-				res.redirect('/relog')
-			} else {
-				if (result.rows[0].password == [password]) {
-					pool.query('SELECT "aid" FROM Administrators WHERE "aid" = $1', [uid], (err, result1) => {
-						sess = req.body;
-						sess["uid"] = uid;
-						if (result1.rows[0] == null) {
-							res.redirect('/student_homepage')
-						} else {
-							res.redirect('/admin_homepage')
-						}
-					});
-				} else {
-					res.redirect('/relog')
-				}
-			}
-		});
-	});
-
 	// Get for About
 	app.get('/about', function(req, res, next) {
 	 try {
@@ -120,9 +122,24 @@ function initRouter(app) {
 		var uid = req.body.uid;
 		var password = req.body.password;
 
-		pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
-			if (err) {
-				res.redirect('/relog')
+	pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
+		if (result.rows[0] == null) {
+			pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
+				if (result1.rows[0] == null) {
+					res.redirect('/relog')
+				} else if (result1.rows[0].password == [password]) {
+					sess.uid = uid;
+					sess.type = "student"
+					res.redirect('/student_homepage')
+				} else {
+					res.redirect('/relog')
+				}
+			});
+		} else {
+			if (result.rows[0].password == [password]) {
+				sess.uid = uid;
+				sess.type = "admin"
+				res.redirect('/admin_homepage')
 			} else if (result.rows[0] == null) {
 				res.redirect('/relog')
 			} else {
@@ -140,8 +157,9 @@ function initRouter(app) {
 					res.redirect('/relog')
 				}
 			}
-		});
+		}
 	});
+});
 
 	app.get('/admin_allocate_search', function(req, res, next) {
 			res.render('admin_allocate_search', { title: 'Allocated Students' });
@@ -205,6 +223,51 @@ app.get('/admin_homepage', function(req, res, next) {
 //GET for Student
 app.get('/student_homepage', function(req, res, next){
 	res.render('student_homepage', { title: 'Student Homepage' });
+});
+
+// Get for About
+app.get('/about', function(req, res, next) {
+ try {
+	if (sess.uid != null) {
+		res.render('about', { title: 'About' });
+	}
+ }
+ catch(err) {
+	res.redirect('/login')
+ }
+});
+
+// GET for Relog
+app.get('/relog', function(req, res, next) {
+	res.render('relog', { title: 'Login' });
+});
+
+// POST for Relog
+app.post('/relog', function(req, res, next) {
+	var uid = req.body.uid;
+	var password = req.body.password;
+
+	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
+		if (err) {
+			res.redirect('/relog')
+		} else if (result.rows[0] == null) {
+			res.redirect('/relog')
+		} else {
+			if (result.rows[0].password == [password]) {
+				pool.query('SELECT "aid" FROM Administrators WHERE "aid" = $1', [uid], (err, result1) => {
+					sess = req.body;
+					sess["uid"] = uid;
+					if (result1.rows[0] == null) {
+						res.redirect('/student_homepage')
+					} else {
+						res.redirect('/admin_homepage')
+					}
+				});
+			} else {
+				res.redirect('/relog')
+			}
+		}
+	});
 });
 
 // GET for Course Creation
@@ -271,11 +334,10 @@ app.get('/student_homepage', function(req, res, next){
 		res.render('student_creation', { title: 'Creating/Editing Students' });
 	});
 
-// POST for Student Creation
 	app.post('/student_creation', function(req, res, next) {
 		// Retrieve Information
 		var sid  = req.body.sid;
-		var e_year = req.body.e_year;
+		var e_year  = req.body.e_year;
 		var dname1 = req.body.dname1;
 		var dname2 = req.body.dname2;
 
@@ -301,7 +363,7 @@ app.get('/student_homepage', function(req, res, next){
 		// Retrieve Information
 		var aid  = req.body.aid;
 
-		pool.query(sql_query.query.add_admin, [aid], (err, data) => {
+		pool.query(sql_query.query.create_admin, [aid], (err, data) => {
 			res.redirect('/admin')
 		});
 	});
