@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<div>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            text-decoration: none;
+        }
+
+        li {
+            float: right;
+        }
+
+        li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        li a:hover {
+            background-color: #333;
+            text-decoration: none;
+            color:white;
+        }
+
+        li a:hover:not(.active) {
+            background-color: #ddd;
+            text-decoration: none;
+            color:white;
+        }
+
+        .active {
+            background-color: #333;
+            text-decoration: none;
+            color:white;
+        }
+    </style>
+
+<ul>
+    <li><a href="/admin">View Admins</a></li>
+    <li><a href="/admin_creation">Add Admins</a></li>
+    <li><a href="/student">View Students</a></li>
+    <li><a href="/student_creation">Add Students</a></li>
+    <li><a href="/prereq">View Prerequisites</a></li>
+    <li><a href="/prereq_creation">Add Prerequisites</a></li>
+    <li><a href="/courses">View Courses</a></li>
+    <li><a href="/course_creation">Add Courses</a></li>
+    <li><a href="/admin_homepage">Home</a></li>
+
+    <li style="float:left"><a class="active" href="/admin_homepage">RegMod</a></li>
+</ul>
+
+</div>

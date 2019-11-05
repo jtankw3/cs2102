@@ -9,6 +9,7 @@ sql.query = {
 	allocated_students: 'SELECT * FROM Accept NATURAL JOIN EnrolledStudents'
 	+ ' JOIN Users on sid = uid WHERE cid = $1 AND a_year = $2 AND semester = $3;',
 	delete_allocated_students: 'DELETE FROM Accept WHERE cid = $1 sid = $2;',
+	insert_allocated_students: 'INSERT INTO Accept VALUES();',
 
 
 }
