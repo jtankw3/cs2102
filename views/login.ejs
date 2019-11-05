@@ -16,10 +16,12 @@
 
   </head>
   <body>
-    <h1>CS2102: <%=title%></h1>
-		<form id="html_form" action="login" role="form" method="post">
+    <h1><%=title%></h1>
+		<p>Welcome to <%=title%></p>
+		<p><%=message%></p>
+		<form id="html_form" action="" role="form" method="post">
 			<div class="form-group">
-				<label for="uid">UID</label>
+				<label for="uid">User ID</label>
 				<input type="text" class="form-control" id="uid" name="uid" aria-describedby="uidHelp" placeholder="Enter your uid">
 				<small id="uidHelp" class="form-text text-muted"><%=subtext%></small>
 			</div>
