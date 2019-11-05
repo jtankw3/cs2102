@@ -34,7 +34,8 @@
             <td><%= data[i].dname1%></td>
             <td><%= data[i].dname2%></td>
             <td><a href="/student_creation" >Edit</a></td>
-            <td><a href="/student" >Drop</a></td>
+    <td><form action="drop_student?sid=<%= data[i].sid %>" method="post">
+    <input type="submit" name="drop_student" value="Drop" /></form></td>
 
         </tr>
     <% } %>

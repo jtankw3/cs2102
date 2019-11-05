@@ -143,8 +143,10 @@ function initRouter(app) {
 			});
 	});
 
+	//POST for admin deletion
 	app.post('/delete_admin', function(req, res, next) {
-		pool.query(sql_query.query.delete_admin,[req.query.aid],
+		var aid = req.query.aid;
+		pool.query(sql_query.query.delete_admins,[aid],
 			(err, data) => {
 				res.redirect('/admin')
 			});
@@ -215,14 +217,12 @@ function initRouter(app) {
 		});
 	});
 
-	app.get('/courses/delete/:cid', function(req, res, next) {
-		res.render('courses', { title: 'View Courses', data: data.rows });
-	});
-
-	app.post('/courses/delete/<%= data[i].cid%>', function(req,res,next) {
-		pool.query(sql_query.query.delete_course, [req.params.cid], (err,data) => {
-			res.render('courses', {title: 'View Courses', data: data.rows});
-		});
+	// POST for Courses deletion
+	app.post('/delete_course', function(req, res, next) {
+		pool.query(sql_query.query.delete_course,[req.query.cid],
+			(err, data) => {
+				res.redirect('/courses')
+			});
 	});
 
 	// GET for Prereq Creation
@@ -247,6 +247,16 @@ function initRouter(app) {
 		pool.query(sql_query.query.view_prereq, (err, data) => {
 			res.render('prereq', { title: 'View Prerequisites', data: data.rows });
 		});
+	});
+
+	// POST for Prereq deletion
+	app.post('/delete_prereq', function(req, res, next) {
+		var required_cid = req.query.required_cid;
+		var requiring_cid = req.query.requiring_cid;
+		pool.query(sql_query.query.delete_prereqs,[required_cid,requiring_cid],
+			(err, data) => {
+				res.redirect('/prereq')
+			});
 	});
 
 	// GET for Student Creation
@@ -280,6 +290,15 @@ function initRouter(app) {
 		});
 	});
 
+	// POST for Student deletion
+	app.post('/drop_student', function(req, res, next) {
+		var sid = req.query.sid;
+		pool.query(sql_query.query.drop_students,[sid],
+			(err, data) => {
+				res.redirect('/student')
+			});
+	});
+
 	// GET for Admin Creation
 	app.get('/admin_creation', function(req, res, next) {
 		res.render('admin_creation', { title: 'Creating/Editing Administrators' });
@@ -289,14 +308,14 @@ function initRouter(app) {
 	app.post('/admin_creation', function(req, res, next) {
 		// Retrieve Information
 		var aid  = req.body.aid;
-		var aname = req.body.aname;
+		var name = req.body.name;
 
-		pool.query(sql_query.query.create_admin, [aid,aname], (err, data) => {
+		pool.query(sql_query.query.create_admin, [aid,name], (err, data) => {
 			res.redirect('/admin')
 		});
 	});
 
-	// GET for Admin
+	// GET for Admin view
 	app.get('/admin', function(req, res, next) {
 		pool.query(sql_query.query.view_admin, (err, data) => {
 			res.render('admin', { title: 'View Administrators', data: data.rows });

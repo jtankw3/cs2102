@@ -30,7 +30,8 @@
             <td><%= data[i].requiring_cid%></td>
             <td><%= data[i].setter%></td>
             <td><a href="/prereq_creation" >Edit</a></td>
-            <td><a href="/prereq" >Delete</a></td>
+    <td><form action="delete_prereq?required_cid=<%= data[i].required_cid %>&requiring_cid=<%= data[i].requiring_cid%>" method="post">
+    <input type="submit" name="delete_prereq" value="Delete" /></form></td>
         </tr>
     <% } %>
     </tbody>
