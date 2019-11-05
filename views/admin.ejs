@@ -19,12 +19,14 @@
     <thead>
     <tr>
         <th scope="col">Admin ID</th>
+        <th scope="col">Admin Name</th>
     </tr>
     </thead>
     <body>
     <% for(var i=0; i<data.length; i++) { %>
         <tr>
             <td><%= data[i].aid%></td>
+            <td><%= data[i].name%></td>
             <td><a href="/admin_edit" >Edit</a></td>
   			</td>
 

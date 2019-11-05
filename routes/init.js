@@ -177,12 +177,12 @@ function initRouter(app) {
 	app.post('/course_creation', function(req, res, next) {
 		// Retrieve Information
 		var cid  = req.body.cid;
-		var quota = req.body.quota;
-		var name    = req.body.name;
-		var credit = req.body.credit;
+		var c_name = req.body.c_name;
+		var c_quota = req.body.c_quota;
+		var credits = req.body.credits;
 		var c_admin = req.body.c_admin;
 
-		pool.query(sql_query.query.create_course, [cid, quota, name, credit, c_admin], (err, data) => {
+		pool.query(sql_query.query.create_course, [cid, c_name, c_quota, credits, c_admin], (err, data) => {
 			res.redirect('/courses')
 		});
 	});
@@ -268,8 +268,9 @@ function initRouter(app) {
 	app.post('/admin_creation', function(req, res, next) {
 		// Retrieve Information
 		var aid  = req.body.aid;
+		var aname = req.body.aname;
 
-		pool.query(sql_query.query.create_admin, [aid], (err, data) => {
+		pool.query(sql_query.query.create_admin, [aid,aname], (err, data) => {
 			res.redirect('/admin')
 		});
 	});

@@ -19,6 +19,7 @@
     <thead>
     <tr>
         <th scope="col">Student ID</th>
+        <th scope="col">Student Name</th>
         <th scope="col">Enrolled Year</th>
         <th scope="col">Degree Name 1</th>
         <th scope="col">Degree Name 2</th>
@@ -28,6 +29,7 @@
     <% for(var i=0; i<data.length; i++) { %>
         <tr>
             <td><%= data[i].sid%></td>
+            <td><%= data[i].name%></td>
             <td><%= data[i].e_year%></td>
             <td><%= data[i].dname1%></td>
             <td><%= data[i].dname2%></td>
