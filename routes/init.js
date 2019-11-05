@@ -99,31 +99,47 @@ function initRouter(app) {
 	// add all app.get app.post things here
 
 	app.get('/admin_allocate_search', function(req, res, next) {
-			res.render('admin_allocate_search', { title: 'Allocated Students' });
+			res.render('admin_allocate_search', { title: 'Allocated Students',
+		subtext: "" });
 	});
 
 
 	app.post('/admin_allocate_search', function(req, res, next) {
-		pool.query(sql_query.query.allocated_students,[req.body.cid, acad_year,semester],
+		var cid = req.body.cid.toUpperCase();
+		var a_year = req.body.a_year.toUpperCase();
+		var semester = req.body.semester.toUpperCase();
+		pool.query(sql_query.query.allocated_students, [cid, a_year, semester],
 			(err, data) => {
-				res.render('admin_allocate_select', { title: req.body.cid,
-					data: data.rows });
+				if (err) {
+					res.render('admin_allocate_search', { title: 'Allocated Students',
+					subtext: "An error occured, please check your input and try again." });
+				} else {
+				res.render('admin_allocate_select', { course: cid,
+					a_year: a_year, semester: semester, data: data.rows });
+				}
 			});
 	});
 
 	app.get('/admin_allocate_select', function(req, res, next) {
-		pool.query(sql_query.query.allocated_students,[req.query.cid, acad_year,semester],
+		pool.query(sql_query.query.allocated_students,[req.query.cid,
+			req.query.a_year,req.query.semester],
 			(err, data) => {
-				res.render('admin_allocate_select', { title: req.query.cid,
+				res.render('admin_allocate_select', { course: req.query.cid,
+					a_year: req.query.a_year, semester: req.query.semester,
 					data: data.rows });
 			});
 	});
 
 	app.post('/delete_allocate', function(req, res, next) {
-		pool.query(sql_query.query.delete_allocated_students,[req.query.cid,
-			acad_year,semester],
+		var a_year  = req.query.a_year.toUpperCase();
+		var sem  = req.query.semester.toUpperCase();
+		var sid  = req.query.sid.toUpperCase();
+		var cid  = req.query.cid.toUpperCase();
+
+		pool.query(sql_query.query.delete_allocated_students,[cid, sid],
 			(err, data) => {
-				res.redirect('/admin_allocate_select')
+				res.redirect('/admin_allocate_select?cid=' + cid
+			+"&a_year=" + a_year + "&semester=" + sem);
 			});
 	});
 
@@ -135,19 +151,24 @@ function initRouter(app) {
 	});
 
 	app.get('/admin_allocate_insert', function(req, res, next) {
-		res.render('admin_allocate_insert');
+		res.render('admin_allocate_insert', {subtext: ""});
 	});
 
 	app.post('/admin_allocate_insert', function(req, res, next) {
-		var sid  = req.body.sid;
-		var cid    = req.body.cid;
+		var a_year  = req.body.a_year.toUpperCase();
+		var sem  = req.body.semester.toUpperCase();
+		var sid  = req.body.sid.toUpperCase();
+		var cid  = req.body.cid.toUpperCase();
 
-	  pool.query(sql_query.query.add_user, [uid, name, password], (err, data) => {
+	  pool.query(sql_query.query.add_allocated_students,
+				[sid, cid, a_year, sem], (err, data) => {
 	    if(err) {
-	      console.error("Error in adding user");
-	      res.redirect('/admin_allocate_insert');
-	    } else {
-	      res.redirect('/admin_allocate_select?cid=' + cid);
+	      console.error(err['detail']);
+				res.render('admin_allocate_insert', {
+					subtext: "An error occured, please check your input and try again."});
+			} else {
+	    res.redirect('/admin_allocate_select?cid=' + cid
+		+"&a_year=" + a_year + "&semester=" + sem);
 			}
 		});
 	});
