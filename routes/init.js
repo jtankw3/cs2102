@@ -15,7 +15,6 @@ var reg_round;
 
 function initRouter(app) {
 	/* GET */
-<<<<<<< Updated upstream
   app.get('/', function(req, res, next) {
 			pool.query(sql_query.query.get_period, (err, data) => {
 				if (data.rows[0] == null) {
@@ -30,54 +29,16 @@ function initRouter(app) {
 			semester: semester, round: reg_round});
 	});
 
-	// POST for login
-app.post('/login', function(req, res, next) {
-  var uid = req.body.uid;
-  var password = req.body.password;
-
-  pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
-    if (result.rows[0] == null) {
-      pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
-        if (result1.rows[0] == null) {
-          res.redirect('/relog')
-        } else if (result1.rows[0].password == [password]) {
-          sess.uid = uid;
-          sess.type = "student"
-          res.redirect('/student_homepage')
-        } else {
-          res.redirect('/relog')
-        }
-      });
-    } else {
-      if (result.rows[0].password == [password]) {
-        sess.uid = uid;
-        sess.type = "admin"
-        res.redirect('/admin_homepage')
-      } else {
-        res.redirect('/relog')
-      }
-    }
-  });
-});
-
   /* All select operations can use this template */
   app.get('/test_select', function(req, res, next) {
   	pool.query(sql_query.query.find_user, (err, data) => {
   		res.render('test_select', { title: 'Select', data: data.rows });
   	});
   });
-=======
+
 	app.get('/', function(req, res, next) {
 		res.render('index', { title: 'ModReg'});
 	});
-
-	/* All select operations can use this template */
-	app.get('/test_select', function(req, res, next) {
-		pool.query(sql_query.query.find_user, (err, data) => {
-			res.render('test_select', { title: 'Select', data: data.rows });
-		});
-	});
->>>>>>> Stashed changes
 
 	/* All insert operations can use this template */
 	app.get('/test_insert', function(req, res, next) {
@@ -101,19 +62,6 @@ app.post('/login', function(req, res, next) {
 	  });
 	});
 
-<<<<<<< Updated upstream
-  // add all app.get app.post things here
-
-
-	// GET for login
-	app.get('/login', function(req, res, next) {
-		if (sess["uid"] != null) {
-			res.render('/about')
-		} else {
-			res.render('login', { title: 'Login' });
-		}
-	});
-=======
 	// add all app.get app.post things here
 
 
@@ -125,7 +73,36 @@ app.get('/login', function(req, res, next) {
 		res.render('login', { title: 'Login', subtext: 'Do not share your password with anyone!', error: ''});
 	}
 });
->>>>>>> Stashed changes
+
+	// POST for login
+	app.post('/login', function(req, res, next) {
+		var uid = req.body.uid;
+		var password = req.body.password;
+		pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
+			if (result.rows[0] == null) {
+				pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
+					if (result1.rows[0] == null) {
+						res.render('login', { title: 'Login', subtext: '', error: 'UID does not exist.'})
+					} else if (result1.rows[0].password == [password]) {
+						sess.uid = uid;
+						sess.type = "student"
+						res.redirect('/student_homepage')
+					} else {
+						res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.'})
+					}
+				});
+			} else {
+				if (result.rows[0].password == [password]) {
+					sess.uid = uid;
+					sess.type = "admin"
+					res.redirect('/admin_homepage')
+				} else {
+					res.render('login', { title: 'Login', subtext: '', error: 'Wrong password'})
+				}
+			}
+		});
+	});
+
 
 	// Get for About
 	app.get('/about', function(req, res, next) {
@@ -138,76 +115,6 @@ app.get('/login', function(req, res, next) {
 		res.redirect('/login')
 	 }
 	});
-
-<<<<<<< Updated upstream
-	// GET for Relog
-	app.get('/relog', function(req, res, next) {
-		res.render('relog', { title: 'Login' });
-	});
-
-	// POST for Relog
-	app.post('/', function(req, res, next) {
-		var uid = req.body.uid;
-		var password = req.body.password;
-
-	pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
-		if (result.rows[0] == null) {
-			pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
-				if (result1.rows[0] == null) {
-					res.redirect('/relog')
-				} else if (result1.rows[0].password == [password]) {
-					sess.uid = uid;
-					sess.type = "student"
-					res.redirect('/student_homepage')
-				} else {
-					res.redirect('/relog')
-				}
-			});
-		} else {
-			if (result.rows[0].password == [password]) {
-				sess.uid = uid;
-				sess.type = "admin"
-				res.redirect('/admin_homepage')
-			} else if (result.rows[0] == null) {
-				res.redirect('/relog')
-			} else {
-				if (result.rows[0].password == [password]) {
-					pool.query('SELECT "aid" FROM Administrator WHERE "aid" = $1', [uid], (err, result1) => {
-						sess = req.body;
-						sess.uid = uid;
-						if (result1.rows[0] == null) {
-							res.redirect('/about')
-						} else {
-							res.redirect('/index')
-						}
-					});
-				} else {
-					res.redirect('/relog')
-				}
-=======
-	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
-		if (err) {
-			res.redirect('/login')
-		} else if (result.rows[0] == null) {
-			res.render('login', { title: 'Login', subtext: '', error: 'UID does not exist.'})
-		} else {
-			if (result.rows[0].password == [password]) {
-				pool.query('SELECT "aid" FROM Administrators WHERE "aid" = $1', [uid], (err, result1) => {
-					//sess = req.body;
-					sess.uid = uid;
-					if (result1.rows[0] == null) {
-						res.redirect('/student_homepage')
-					} else {
-						res.redirect('/index')
-					}
-				});
-			} else {
-				res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.'})
->>>>>>> Stashed changes
-			}
-		}
-	});
-});
 
 	app.get('/admin_allocate_search', function(req, res, next) {
 			res.render('admin_allocate_search', { title: 'Allocated Students' });
@@ -275,52 +182,9 @@ app.get('/student_homepage', function(req, res, next){
 
 // Get for About
 app.get('/about', function(req, res, next) {
-<<<<<<< Updated upstream
- try {
-	if (sess.uid != null) {
 		res.render('about', { title: 'About' });
-	}
- }
- catch(err) {
-	res.redirect('/login')
- }
 });
 
-// GET for Relog
-app.get('/relog', function(req, res, next) {
-	res.render('relog', { title: 'Login' });
-});
-
-// POST for Relog
-app.post('/relog', function(req, res, next) {
-	var uid = req.body.uid;
-	var password = req.body.password;
-
-	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
-		if (err) {
-			res.redirect('/relog')
-		} else if (result.rows[0] == null) {
-			res.redirect('/relog')
-		} else {
-			if (result.rows[0].password == [password]) {
-				pool.query('SELECT "aid" FROM Administrators WHERE "aid" = $1', [uid], (err, result1) => {
-					sess = req.body;
-					sess["uid"] = uid;
-					if (result1.rows[0] == null) {
-						res.redirect('/student_homepage')
-					} else {
-						res.redirect('/admin_homepage')
-					}
-				});
-			} else {
-				res.redirect('/relog')
-			}
-		}
-	});
-=======
-	res.render('about', { title: 'About' });
->>>>>>> Stashed changes
-});
 
 // GET for Course Creation
 	app.get('/course_creation', function(req, res, next) {
@@ -443,9 +307,7 @@ app.post('/relog', function(req, res, next) {
 
 		var insert_query = "INSERT INTO register VALUES(" + a_year + "," + semester + "," + round + ",'" + sid + "','" + cid + "')";
 		pool.query(insert_query, (err, data) => {
-<<<<<<< Updated upstream
-			res.redirect('/student_homepage')
-=======
+			//res.redirect('/student_homepage')
 			if(err) {
 				var error = err;
 				console.log(error);
@@ -453,7 +315,6 @@ app.post('/relog', function(req, res, next) {
 			} else {
 				res.redirect('/about', );
 			}
->>>>>>> Stashed changes
 		});
 	});
 
@@ -512,7 +373,7 @@ app.post('/relog', function(req, res, next) {
 
 	app.get('/logout', function(req, res, next) {
 			sess["uid"] = null
-			res.render('login', { title: 'Login' });
+			res.render('login', { title: 'Login' , subtext: 'Do not share your password with anyone!', error:''});
 	});
 };
 
