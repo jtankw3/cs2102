@@ -15,6 +15,7 @@ var reg_round;
 
 function initRouter(app) {
 	/* GET */
+<<<<<<< Updated upstream
   app.get('/', function(req, res, next) {
 			pool.query(sql_query.query.get_period, (err, data) => {
 				if (data.rows[0] == null) {
@@ -65,6 +66,18 @@ app.post('/login', function(req, res, next) {
   		res.render('test_select', { title: 'Select', data: data.rows });
   	});
   });
+=======
+	app.get('/', function(req, res, next) {
+		res.render('index', { title: 'ModReg'});
+	});
+
+	/* All select operations can use this template */
+	app.get('/test_select', function(req, res, next) {
+		pool.query(sql_query.query.find_user, (err, data) => {
+			res.render('test_select', { title: 'Select', data: data.rows });
+		});
+	});
+>>>>>>> Stashed changes
 
 	/* All insert operations can use this template */
 	app.get('/test_insert', function(req, res, next) {
@@ -88,6 +101,7 @@ app.post('/login', function(req, res, next) {
 	  });
 	});
 
+<<<<<<< Updated upstream
   // add all app.get app.post things here
 
 
@@ -99,6 +113,19 @@ app.post('/login', function(req, res, next) {
 			res.render('login', { title: 'Login' });
 		}
 	});
+=======
+	// add all app.get app.post things here
+
+
+// GET for login
+app.get('/login', function(req, res, next) {
+	if (sess.uid != null) {
+		res.redirect('/index')
+	} else {
+		res.render('login', { title: 'Login', subtext: 'Do not share your password with anyone!', error: ''});
+	}
+});
+>>>>>>> Stashed changes
 
 	// Get for About
 	app.get('/about', function(req, res, next) {
@@ -112,6 +139,7 @@ app.post('/login', function(req, res, next) {
 	 }
 	});
 
+<<<<<<< Updated upstream
 	// GET for Relog
 	app.get('/relog', function(req, res, next) {
 		res.render('relog', { title: 'Login' });
@@ -156,6 +184,26 @@ app.post('/login', function(req, res, next) {
 				} else {
 					res.redirect('/relog')
 				}
+=======
+	pool.query('SELECT "password" FROM Users WHERE "uid" = $1', [uid], (err, result) => {
+		if (err) {
+			res.redirect('/login')
+		} else if (result.rows[0] == null) {
+			res.render('login', { title: 'Login', subtext: '', error: 'UID does not exist.'})
+		} else {
+			if (result.rows[0].password == [password]) {
+				pool.query('SELECT "aid" FROM Administrators WHERE "aid" = $1', [uid], (err, result1) => {
+					//sess = req.body;
+					sess.uid = uid;
+					if (result1.rows[0] == null) {
+						res.redirect('/student_homepage')
+					} else {
+						res.redirect('/index')
+					}
+				});
+			} else {
+				res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.'})
+>>>>>>> Stashed changes
 			}
 		}
 	});
@@ -227,6 +275,7 @@ app.get('/student_homepage', function(req, res, next){
 
 // Get for About
 app.get('/about', function(req, res, next) {
+<<<<<<< Updated upstream
  try {
 	if (sess.uid != null) {
 		res.render('about', { title: 'About' });
@@ -268,6 +317,9 @@ app.post('/relog', function(req, res, next) {
 			}
 		}
 	});
+=======
+	res.render('about', { title: 'About' });
+>>>>>>> Stashed changes
 });
 
 // GET for Course Creation
@@ -377,7 +429,7 @@ app.post('/relog', function(req, res, next) {
 
 // GET for course_registration
 	app.get('/course_registration', function(req, res, next) {
-		res.render('course_registration', { title: 'Course Registration' });
+		res.render('course_registration', { title: 'Course Registration' , error: ''});
 	});
 
 // POST for course_registration
@@ -385,10 +437,23 @@ app.post('/relog', function(req, res, next) {
 		// Retrieve Information
 		var cid  = req.body.cid;
 		var sid =  sess["uid"];
+		var a_year = "2019";
+		var semester = "1";
+		var round = "2";
 
-		var insert_query = "INSERT INTO register VALUES('" + sid + "','" + cid + "')";
+		var insert_query = "INSERT INTO register VALUES(" + a_year + "," + semester + "," + round + ",'" + sid + "','" + cid + "')";
 		pool.query(insert_query, (err, data) => {
+<<<<<<< Updated upstream
 			res.redirect('/student_homepage')
+=======
+			if(err) {
+				var error = err;
+				console.log(error);
+				res.render('course_registration', { title: 'Course Registration' , error: 'You either have not fulfilled the prerequisites for this module or you have exceeded the maximum modules or the final exams clash. We do not know which :)'});
+			} else {
+				res.redirect('/about', );
+			}
+>>>>>>> Stashed changes
 		});
 	});
 
@@ -408,19 +473,33 @@ app.post('/relog', function(req, res, next) {
 	});
 
 // POST for drop course
-	var sql_query1 = 'DELETE FROM accept WHERE cid =';
+	var sql_query1 = 'DELETE FROM accept WHERE sid =';
 	app.post('/drop_course', function(req, res, next) {
 		// Retrieve Information
 		var cid  = req.body.cid;
 		var sid = sess.uid;
-		// var sid = 'A00000001D'
 
 		// Construct Specific SQL Query
-		var drop_query = sql_query1 + "'" + cid + "'" + "AND sid ='" + sid + "'";
+		var drop_query = sql_query1 + "'" + sid + "'" + "AND cid ='" + cid + "'";
 
-		pool.query(drop_query, (err, data) => {
-			res.redirect('/student_homepage')
+		pool.query("SELECT * FROM Accept WHERE sid = '" + sid +"' AND cid = '" + cid + "'", (err, result) => {
+			if (err) {
+				res.redirect('/drop_course')
+			} else if (result.rows[0] == null) {
+				res.redirect('/drop_course')
+				//res.render('login', { title: 'Login', subtext: '', error: 'UID does not exist.'})
+			} else {
+				pool.query(drop_query, (err, data) => {
+					if(err) {
+						res.redirect('/drop_course')
+					}
+					else {
+						res.redirect('/about', );
+					}
+				});
+			}
 		});
+
 	});
 
 	// GET for view course
