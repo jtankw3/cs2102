@@ -15,7 +15,24 @@
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
-
+<table class="table">
+    <thead>
+    <br>
+    <h4>Registered courses for this round:</h4>
+    <tr>
+        <th scope="col">Course Code</th>
+        <th scope="col">Course Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% for(var i=0; i<data2.length; i++) { %>
+        <tr>
+            <td><%= data2[i].cid%></td>
+            <td><%= data2[i].name%></td>
+        </tr>
+    <% } %>
+    </tbody>
+</table>
 <script>
     (function() {
         window.addEventListener('load', function() {

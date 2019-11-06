@@ -324,7 +324,14 @@ function initRouter(app) {
 
 	// GET for course_registration
 	app.get('/course_registration', function(req, res, next) {
-		res.render('course_registration', { title: 'Course Registration' , error: ''});
+		var sid =  sess["uid"];
+		var a_year = "2019";
+		var semester = "1";
+		var round = "2";
+		var select_query = "SELECT R.cid, C.name FROM register R join courses C  ON R.cid = C.cid WHERE a_year=" + a_year + " AND semester=" + semester + " AND round = " + round + "AND sid ='" + sid + "'";
+		pool.query(select_query, (err2, data2) => {
+			res.render('course_registration', {title: 'View Courses', error:'', data2: data2.rows});
+		});
 	});
 
 	// POST for course_registration
@@ -337,26 +344,42 @@ function initRouter(app) {
 		var round = "2";
 
 		var insert_query = "INSERT INTO register VALUES(" + a_year + "," + semester + "," + round + ",'" + sid + "','" + cid + "')";
+		var select_query = "SELECT R.cid, C.name FROM register R join courses C  ON R.cid = C.cid WHERE a_year=" + a_year + " AND semester=" + semester + " AND round = " + round + "AND sid ='" + sid + "'";
 		pool.query(insert_query, (err, data) => {
-			//res.redirect('/student_homepage')
-			if(err) {
-				if(err.message == "Prerequisite not fulfilled")
-				{
-					res.render('course_registration', { title: 'Course Registration' , error: 'You have not fulfilled the prerequisites for this module.'});
+			pool.query(select_query, (err2, data2) => {
+				//res.render('course_registration', {title: 'View Courses', data2: data2.rows});
+				if (err) {
+					if (err.message == "Prerequisite not fulfilled") {
+						res.render('course_registration', {
+							title: 'Course Registration',
+							error: 'You have not fulfilled the prerequisites for this module.',
+							data2: data2.rows
+						});
+					}
+					if (err.message == "Course selected have clashing examinations") {
+						res.render('course_registration', {
+							title: 'Course Registration',
+							error: 'The timing of the examination for this course clashes with another you have registered for.',
+							data2: data2.rows
+						});
+					}
+					if (err.message == "Module Limit Exceeded") {
+						res.render('course_registration', {
+							title: 'Course Registration',
+							error: 'You have exceeded the maximum number of courses you can take this semester.',
+							data2: data2.rows
+						});
+					}
+					var error = err;
+					res.render('course_registration', {
+						title: 'Course Registration',
+						error: 'You either have not fulfilled the prerequisites for this module or you have exceeded the maximum modules or the final exams clash. We do not know which :)',
+						data2: data2.rows
+					});
+				} else {
+					res.redirect('/success',);
 				}
-				if(err.message == "Course selected have clashing examinations")
-				{
-					res.render('course_registration', { title: 'Course Registration' , error: 'The timing of the examination for this course clashes with another you have registered for.'});
-				}
-				if(err.message == "Module Limit Exceeded")
-				{
-					res.render('course_registration', { title: 'Course Registration' , error: 'You have exceeded the maximum number of courses you can take this semester.'});
-				}
-				var error = err;
-				res.render('course_registration', { title: 'Course Registration' , error: 'You either have not fulfilled the prerequisites for this module or you have exceeded the maximum modules or the final exams clash. We do not know which :)'});
-			} else {
-				res.redirect('/success', );
-			}
+			});
 		});
 	});
 
@@ -409,7 +432,9 @@ function initRouter(app) {
 	app.get('/view_course', function(req, res, next) {
 		var sid = sess.uid;
 		pool.query('SELECT A.cid, C.name FROM Accept A JOIN Courses C ON A.cid = C.cid WHERE A.sid =' + "'" + sid + "'", (err, data) => {
-			res.render('view_course', { title: 'View Courses', data: data.rows });
+		    pool.query('SELECT A.cid, C.name FROM Taken A JOIN Courses C ON A.cid = C.cid WHERE A.sid =' + "'" + sid + "'", (err2, data2) => {
+                res.render('view_course', {title: 'View Courses', data: data.rows, data2: data2.rows});
+            });
 		});
 	});
 
