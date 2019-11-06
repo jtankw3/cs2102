@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Prerequisites</title>
+    <%include partials/head%>
+</head>
+<body>
+<% include partials/menu %>
+<body>
+  <h1>Course Prerequisites</h1>
+  <p style="color: red"><%= error%></p>
+  <form id="html_form" action="student_prereq" role="form" method="post">
+    <div class="form-group">
+      <label for="cid">Search for prerequisites for this course</label>
+      <input type="text" class="form-control" id="cid" name="cid" aria-describedby="matricHelp" placeholder="Enter the course to search">
+    <button style="margin: 5px" type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  <script>
+    (function() {
+      window.addEventListener('load', function() {
+        var forms = [document.getElementById('html_form')];
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', check, false);
+        });
+      }, false);
+    })();
+  </script>
+</body></form>
+
+<h1>List of prerequisites <%=course%></h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Course Code</th>
+      <th scope="col">Course Name</th>
+      <th scope="col">Credits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for(var i=0; i<data.length; i++) { %>
+    <tr>
+      <td><%= data[i].required_cid%></td>
+      <td><%= data[i].name%></td>
+      <td><%= data[i].credits%></td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+<p><%= message%></p>
+
+</body>
+</html>

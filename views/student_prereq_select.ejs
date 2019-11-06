@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Prerequisites</title>
+    <%include partials/head%>
+</head>
+  <body>
+
+    <h1>List of prerequisites <%=course%></h1>
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">Course Code</th>
+          <th scope="col">Course Name</th>
+					<th scope="col">Credits</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% for(var i=0; i<data.length; i++) { %>
+				<tr>
+          <td><%= data[i].cid%></td>
+					<td><%= data[i].name%></td>
+					<td><%= data[i].credits%></td>
+				</tr>
+				<% } %>
+			</tbody>
+		</table>
+</body>
+</html>

@@ -8,13 +8,6 @@
 <% include partials/menu %>
 <h1>Course Registration</h1>
 <p style="color:red"> <%= error%></p>
-<form id="html_form" action="course_registration" role="form" method="post">
-    <div class="form-group">
-        <label for="cid">Course Code</label>
-        <input type="text" class="form-control" id="cid" name="cid" placeholder="Enter the course code">
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 <table class="table">
     <thead>
     <br>
@@ -22,26 +15,23 @@
     <tr>
         <th scope="col">Course Code</th>
         <th scope="col">Course Name</th>
+        <th scope="col">Credits</th>
+        <th scope="col">Delete</ th>
     </tr>
     </thead>
     <tbody>
-    <% for(var i=0; i<data2.length; i++) { %>
+    <% for(var i=0; i<data.length; i++) { %>
         <tr>
-            <td><%= data2[i].cid%></td>
-            <td><%= data2[i].name%></td>
+            <td><%= data[i].cid%></td>
+            <td><%= data[i].name%></td>
+            <td><%= data[i].credits%></td>
+            <td><form action="delete_register?&cid=<%= data[i].cid%>" method="post">
+            <input type="submit" name="delete_register" value="X" /></form></td>
         </tr>
     <% } %>
     </tbody>
 </table>
-<script>
-    (function() {
-        window.addEventListener('load', function() {
-            var forms = [document.getElementById('html_form')];
-            var validation = Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', check, false);
-            });
-        }, false);
-    })();
-</script>
+<form style="margin:10px; display:inline" action="/course_registration_insert" method="get">
+<input class="btn btn-primary btn-space" type="submit" name="course_registration_insert" value="Add Course" /></form>
 </body>
 </html>

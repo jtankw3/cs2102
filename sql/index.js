@@ -25,6 +25,7 @@ sql.query = {
 	create_admin: 'INSERT INTO Administrators(aid,name) VALUES($1,$2) ON CONFLICT(aid) DO UPDATE SET aid = $1, name = $2',
 	view_admin: 'SELECT * FROM Administrators',
 	delete_admins: 'DELETE FROM Administrators WHERE aid = $1',
+	add_exam: 'INSERT INTO FinalExams VALUES($1,$2,$3,$4)',
 
 	calculate_priority: "With CoreReq AS (SELECT * FROM Requirements WHERE type = 'core' and required_cid = $1), "
 	+ "RemainingQuota as (SELECT quota - (SELECT COUNT(*) FROM Accept WHERE cid = $1 "
@@ -39,9 +40,25 @@ sql.query = {
 	+ "ORDER BY Priority DESC, RANDOM() "
 	+ "LIMIT (SELECT * FROM RemainingQuota)",
 
-	add_exam: 'INSERT INTO FinalExams VALUES($1,$2,$3,$4)'
+	view_register: "SELECT R.cid, C.name, C.credits FROM register R JOIN courses C "
+	+ "ON R.cid = C.cid WHERE a_year=$1 AND semester=$2 AND round = $3"
+	+ "AND sid = $4",
+	create_register: "INSERT INTO register(a_year, semester, round, sid, cid) "
+	+ "VALUES($1, $2, $3, $4, $5)",
+	delete_register: 'DELETE FROM Register WHERE cid = $1 AND sid = $2 '
+	+ "AND a_year = $3 AND semester =$4 and round=$5",
+
+	view_accept: "SELECT A.cid, C.name, C.credits FROM Accept A JOIN Courses C "
+	+ "ON A.cid = C.cid WHERE A.sid =$1",
+	view_taken: "SELECT A.cid, C.name FROM Taken A JOIN Courses "
+	+ "C ON A.cid = C.cid WHERE A.sid = $1",
+	drop_accept: "DELETE FROM accept WHERE sid =$1 and cid =$2",
+
+	search_prereq: "SELECT * FROM Prerequisites JOIN Courses ON requiring_cid "
+	+ "= cid WHERE requiring_cid = $1",
+	view_requirements: "SELECT required_cid, type FROM requirements WHERE name = $1",
+
+	get_degrees: "SELECT dname1, dname2 FROM EnrolledStudents where sid=$1"
 }
-
-
 
 module.exports = sql

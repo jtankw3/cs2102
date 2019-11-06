@@ -11,10 +11,12 @@
 <table class="table">
     <thead>
     <br>
-    <h4>Successfully registered courses for this semesters:</h4>
+    <h4>Allocated courses for this semesters:</h4>
     <tr>
         <th scope="col">Course Code</th>
         <th scope="col">Course Name</th>
+        <th scope="col">Credits</th>
+        <th scope="col">Drop</th>
     </tr>
     </thead>
     <tbody>
@@ -22,6 +24,9 @@
         <tr>
             <td><%= data[i].cid%></td>
             <td><%= data[i].name%></td>
+            <td><%= data[i].credits%></td>
+            <td><form action="drop_course?cid=<%= data[i].cid %>" method="post">
+            <input type="submit" name="drop_course" value="X" /></form></td>
         </tr>
     <% } %>
     </tbody>
