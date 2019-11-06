@@ -257,14 +257,14 @@ function initRouter(app) {
 		pool.query(sql_query.query.create_course, [cid, c_name, c_quota, credits, c_admin], (err, data) => {
 			if (err) {
 				console.error(err);
-				res.render('course_creation', { title: 'Creating/Editing Administrators',
+				res.render('course_creation', { title: 'Creating/Editing Course',
 				error: 'An error occured, please check your inputs and try again.'});
 			} else {
 				if (date != '') {
 					pool.query(sql_query.query.add_exam, [cid, finalexam_s_time, finalexam_e_time, venue], (err, data) => {
 						if (err) {
 							console.error(err);
-							res.render('course_creation', { title: 'Creating/Editing Administrators',
+							res.render('course_creation', { title: 'Creating/Editing Course',
 								error: 'An error occured, please check your inputs and try again.'});
 						} else {
 							res.redirect('/courses')
