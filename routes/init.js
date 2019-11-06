@@ -245,7 +245,16 @@ function initRouter(app) {
 		var c_name = req.body.c_name;
 		var c_quota = req.body.c_quota;
 		var credits = req.body.credits;
+		var date = req.body.exam_date;
+		var stime = req.body.s_time;
+		var etime = req.body.e_time;
+		var venue = req.body.venue;
 		var c_admin = sess.uid;
+
+		var finalexam_s_time = date + " " + stime;
+		var finalexam_e_time = date + " " + etime;
+
+
 
 		pool.query(sql_query.query.create_course, [cid, c_name, c_quota, credits, c_admin], (err, data) => {
 			if (err) {
@@ -253,7 +262,19 @@ function initRouter(app) {
 				res.render('course_creation', { title: 'Creating/Editing Administrators',
 				error: 'An error occured, please check your inputs and try again.'});
 			} else {
-				res.redirect('/courses')
+				if (date != '') {
+					pool.query(sql_query.query.add_exam, [cid, finalexam_s_time, finalexam_e_time, venue], (err, data) => {
+						if (err) {
+							console.error(err);
+							res.render('course_creation', { title: 'Creating/Editing Administrators',
+								error: 'An error occured, please check your inputs and try again.'});
+						} else {
+							res.redirect('/courses')
+						}
+					});
+				} else {
+					res.redirect('/courses')
+				}
 			}
 		});
 	});
