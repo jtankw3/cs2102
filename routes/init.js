@@ -490,12 +490,6 @@ function initRouter(app) {
 		});
 	});
 
-
-
-	// GET for View degree requirements
-	var degree = 'Computer Science'
-	var sql_query2 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree + "'";
-
 	app.get('/degree_requirements', function(req, res, next) {
 		check_login(res, 'student')
 		var degree_1 = degree1;
@@ -587,8 +581,9 @@ function getCurrentPeriod(req, res, callback) {
 }
 
 function check_login(res, type) {
-	// if (sess.uid == null || sess.type != type) {
-	// 	res.redirect('/')
+	if (sess.uid == null || sess.type != type) {
+		res.redirect('/')
+	}
 	// }
 }
 module.exports = initRouter;
