@@ -417,64 +417,59 @@ function initRouter(app) {
 	// GET for course_registration
 	app.get('/course_registration', function(req, res, next) {
 		check_login(res, 'student')
-		var sid =  sess["uid"];
-		var a_year = "2019";
-		var semester = "1";
-		var round = "2";
-		var select_query = "SELECT R.cid, C.name FROM register R join courses C  ON R.cid = C.cid WHERE a_year=" + a_year + " AND semester=" + semester + " AND round = " + round + "AND sid ='" + sid + "'";
-		pool.query(select_query, (err2, data2) => {
-			res.render('course_registration', {title: 'View Courses', error:'', data2: data2.rows});
+		getCurrentPeriod(req, res, (req, res) => {
+			if (acad_year == null) {
+				res.render('course_registration_closed', {title: 'View Courses',
+				data: []});
+			} else {
+				var sid = sess.uid;
+				pool.query(sql_query.query.view_register,
+					[acad_year, semester, reg_round, sid], (err, data) => {
+						res.render('course_registration', {title: 'View Courses', error:'',
+						data: data.rows});
+				});
+			}
+		});
+	});
+
+	app.get('/course_registration_insert', function(req, res, next) {
+		res.render('course_registration_insert', {title: 'View Courses', error:'',
 		});
 	});
 
 	// POST for course_registration
-	app.post('/course_registration', function(req, res, next) {
+	app.post('/course_registration_insert', function(req, res, next) {
 		// Retrieve Information
-		var cid  = req.body.cid;
-		var sid =  sess["uid"];
-		var a_year = "2019";
-		var semester = "1";
-		var round = "2";
-
-		var insert_query = "INSERT INTO register VALUES(" + a_year + "," + semester + "," + round + ",'" + sid + "','" + cid + "')";
-		var select_query = "SELECT R.cid, C.name FROM register R join courses C  ON R.cid = C.cid WHERE a_year=" + a_year + " AND semester=" + semester + " AND round = " + round + "AND sid ='" + sid + "'";
-		pool.query(insert_query, (err, data) => {
-			pool.query(select_query, (err2, data2) => {
-				//res.render('course_registration', {title: 'View Courses', data2: data2.rows});
+		var cid  = req.body.cid.toUpperCase();
+		var sid =  sess.uid;
+		console.log(cid, sid)
+		pool.query(sql_query.query.create_register,
+			[acad_year, semester, reg_round, sid, cid], (err, data) => {
+				var error_msg = '';
 				if (err) {
+					console.error(err);
 					if (err.message == "Prerequisite not fulfilled") {
-						res.render('course_registration', {
-							title: 'Course Registration',
-							error: 'You have not fulfilled the prerequisites for this module.',
-							data2: data2.rows
-						});
+						error_msg = "You have not fulfilled the prerequisites for this course."
+					} else if (err.message == "Course selected have clashing examinations")  {
+						error_msg = "The timing of the examination for this course clashes "
+						+ " with another you have registered for or have been allocated."
+					} else if (err.message == "Course Limit Exceeded") {
+						error_msg = "You have exceeded the maximum number of courses you can take this semester."
+					} else if (err.message == "Already Allocated Course") {
+						error_msg = "You have already been allocated this course."
+					} else {
+						error_msg = "Invalid input. If you entered a valid course code, you "
+						+ "may already have registered for it"
 					}
-					if (err.message == "Course selected have clashing examinations") {
-						res.render('course_registration', {
-							title: 'Course Registration',
-							error: 'The timing of the examination for this course clashes with another you have registered for.',
-							data2: data2.rows
-						});
-					}
-					if (err.message == "Module Limit Exceeded") {
-						res.render('course_registration', {
-							title: 'Course Registration',
-							error: 'You have exceeded the maximum number of courses you can take this semester.',
-							data2: data2.rows
-						});
-					}
-					var error = err;
-					res.render('course_registration', {
-						title: 'Course Registration',
-						error: 'You either have not fulfilled the prerequisites for this module or you have exceeded the maximum modules or the final exams clash. We do not know which :)',
-						data2: data2.rows
-					});
-				} else {
-					res.redirect('/success',);
+				res.render('course_registration_insert', {title: "Course Registration",
+				 error: error_msg,});
+			 } else {
+			 		res.redirect('/course_registration');
 				}
-			});
 		});
 	});
+
+
 
 	// GET for View degree requirements
 	var degree = 'Computer Science'
@@ -492,6 +487,16 @@ function initRouter(app) {
 				res.render('degree_requirements', {title: 'Degree Requirements', data1: data1.rows, data2: data2.rows});
 			});
 		});
+	});
+
+	app.post('/delete_register', function(req, res, next) {
+		var sid  = req.query.sid.toUpperCase();
+		var cid  = req.query.cid.toUpperCase();
+
+		pool.query(sql_query.query.delete_register,
+			[cid, sid, acad_year, semester, reg_round], (err, data) => {
+				res.redirect('/course_registration');
+			});
 	});
 
 	// GET for drop course
@@ -556,14 +561,13 @@ function getCurrentPeriod(req, res, callback) {
 			semester = data.rows[0].semester;
 			reg_round = data.rows[0].round;
 		}
-		console.log(req.query);
 		callback(req, res)
 	});
 }
 
 function check_login(res, type) {
-	if (sess.uid == null || sess.type != type) {
-		res.redirect('/')
-	}
+	// if (sess.uid == null || sess.type != type) {
+	// 	res.redirect('/')
+	// }
 }
 module.exports = initRouter;

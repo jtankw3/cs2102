@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Course Registration</title>
+    <%include partials/head%>
+</head>
+<body>
+<% include partials/menu %>
+<h1>Course Registration</h1>
+<p style="color:red"> <%= error%></p>
+<form id="html_form" action="course_registration_insert" role="form" method="post">
+    <div class="form-group">
+        <label for="cid">Course Code</label>
+        <input type="text" class="form-control" id="cid" name="cid" placeholder="Enter the course code">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<script>
+    (function() {
+        window.addEventListener('load', function() {
+            var forms = [document.getElementById('html_form')];
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', check, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html>

@@ -3,8 +3,7 @@
 	add new requirement: INSERT INTO Requirements VALUES('Nursing', 'NN1010', 'core');
 	add without prereq: INSERT INTO Register VALUES(2019, 1, 3, 'A1000009Z', 'CS1025');
 	add clashing exams: INSERT INTO Register VALUES(2019, 1, 3, 'A1000002Z', 'CS1014');
-	add more than 7 mods: INSERT INTO Register VALUES(2019, 1, 3, 'A1000003Z', 'CS1019');
-	add more than 7 mods: INSERT INTO Register VALUES(2019, 1, 3, 'A1000003Z', 'CS1018');
+	add more than 7 mods: INSERT INTO Register VALUES(2019, 1, 3, 'A1000001Z', 'CS1019');
 	complex query for priority: use CS1017 which has quota 5 but 6 registers
 	*/
 
@@ -132,7 +131,7 @@ CREATE OR REPLACE FUNCTION deg_func()
 		FROM Requirements
 		WHERE name = NEW.name)
 	THEN RETURN NEW;
-	ELSE RAISE NOTICE
+	ELSE RAISE
 		'Cannot add degree without requirements';
 		RETURN NULL;
 	END IF;
@@ -179,7 +178,7 @@ RETURNS TRIGGER AS $$ BEGIN
 				AND R.semester = NEW.semester
 				AND R.round = NEW.round)))
 		THEN
-		RAISE NOTICE 'Course selected have clashing examinations';
+		RAISE 'Course selected have clashing examinations';
 		RETURN NULL;
 		ELSE RETURN NEW;
 		END IF;
@@ -202,7 +201,7 @@ CREATE OR REPLACE FUNCTION prereq()
 			SELECT cid
 			FROM Taken
 			WHERE sid = NEW.sid)
-	THEN RAISE NOTICE 'Prerequisite not fulfilled';
+	THEN RAISE 'Prerequisite not fulfilled';
 	RETURN NULL;
 	ELSE RETURN NEW;
 	END IF;
@@ -213,23 +212,49 @@ CREATE TRIGGER pre_req
 	FOR EACH ROW
 	EXECUTE PROCEDURE prereq();
 
-	/* Trigger for Max modules */
-		CREATE OR REPLACE FUNCTION max_modules()
+	CREATE OR REPLACE FUNCTION dup_register()
 		RETURNS TRIGGER AS $$ BEGIN
-		IF (SELECT COUNT(*) FROM Register
-			WHERE a_year = new.a_year
-			AND round = new.round
-			AND sid = new.sid) > 6
-		THEN RAISE NOTICE 'Module Limit Exceeded';
+		IF EXISTS (
+				SELECT 1
+				FROM Accept
+				WHERE cid = NEW.cid
+				AND sid = NEW.sid
+				AND a_year = NEW.a_year
+				AND semester = NEW.semester
+		)
+		THEN RAISE 'Already Allocated Course';
 		RETURN NULL;
 		ELSE RETURN NEW;
 		END IF;
 		END; $$ LANGUAGE plpgsql;
 
-		CREATE TRIGGER max_modules
+	CREATE TRIGGER dup_register
 		BEFORE INSERT OR UPDATE ON Register
 		FOR EACH ROW
-		EXECUTE PROCEDURE max_modules();
+		EXECUTE PROCEDURE dup_register();
+
+	/* Trigger for Max courses */
+	CREATE OR REPLACE FUNCTION max_courses()
+		RETURNS TRIGGER AS $$ BEGIN
+		IF ((SELECT COUNT(*) FROM Register
+			WHERE a_year = new.a_year
+			AND semester = new.semester
+			AND round = new.round
+			AND sid = new.sid) +
+			(SELECT COUNT(*) FROM Accept
+				WHERE a_year = new.a_year
+				AND semester = new.semester
+				AND sid = new.sid)) > 6
+		THEN RAISE 'Course Limit Exceeded';
+		RETURN NULL;
+		ELSE RETURN NEW;
+		END IF;
+		END; $$ LANGUAGE plpgsql;
+
+		CREATE TRIGGER max_courses
+		BEFORE INSERT OR UPDATE ON Register
+		FOR EACH ROW
+		EXECUTE PROCEDURE max_courses();
 
 /* use A1000001Z - A1000005Z for testing, A1000003Z has taken all prereq */
 INSERT INTO Administrators VALUES('B1000001X', 'ADMINISTRATOR1', 'password1');
@@ -336,16 +361,21 @@ INSERT INTO Taken VALUES('A1000005Z', 'CS1012');
 INSERT INTO Taken VALUES('A1000006Z', 'CS1011');
 INSERT INTO Taken VALUES('A1000006Z', 'CS1012');
 
+INSERT INTO Accept VALUES('A1000001Z', 'CS1012', 2019, 1);
+INSERT INTO Accept VALUES('A1000001Z', 'CS1013', 2019, 1);
+INSERT INTO Accept VALUES('A1000001Z', 'CS1014', 2019, 1);
+INSERT INTO Accept VALUES('A1000001Z', 'CS1017', 2019, 1);
+
 INSERT INTO Register VALUES(2018, 2, 1, 'A1000001Z', 'CS1010');
 INSERT INTO Register VALUES(2018, 2, 2, 'A1000001Z', 'CS1011');
 INSERT INTO Register VALUES(2018, 2, 3, 'A1000001Z', 'CS1013');
 INSERT INTO Register VALUES(2018, 2, 3, 'A1000001Z', 'CS1014');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000001Z', 'CS1015');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000001Z', 'CS1016');
-INSERT INTO Register VALUES(2019, 1, 3, 'A1000001Z', 'CS1017');
+INSERT INTO Register VALUES(2019, 1, 3, 'A1000001Z', 'CS1018');
 INSERT INTO Register VALUES(2019, 1, 2, 'A1000001Z', 'CS1015');
 INSERT INTO Register VALUES(2019, 1, 2, 'A1000001Z', 'CS1016');
-INSERT INTO Register VALUES(2019, 1, 2, 'A1000001Z', 'CS1017');
+INSERT INTO Register VALUES(2019, 1, 2, 'A1000001Z', 'CS1018');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000002Z', 'CS1012');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000002Z', 'CS1013');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000002Z', 'CS1015');
@@ -379,8 +409,3 @@ INSERT INTO Register VALUES(2019, 1, 3, 'A1000008Z', 'CS1012');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000009Z', 'CS1011');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000009Z', 'CS1012');
 INSERT INTO Register VALUES(2019, 1, 3, 'A1000011Z', 'CS1017');
-
-INSERT INTO Accept VALUES('A1000001Z', 'CS1012', 2019, 1);
-INSERT INTO Accept VALUES('A1000001Z', 'CS1013', 2019, 1);
-INSERT INTO Accept VALUES('A1000001Z', 'CS1014', 2019, 1);
-INSERT INTO Accept VALUES('A1000001Z', 'CS1017', 2019, 1);

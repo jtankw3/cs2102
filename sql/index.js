@@ -37,7 +37,16 @@ sql.query = {
 	+ "FROM (SELECT * FROM Register WHERE (sid, cid) not in (select sid, cid from accept)) R1 NATURAL JOIN EnrolledStudents E1 "
 	+ "WHERE R1.cid = $1 AND a_year = $2 AND semester = $3 AND round = $4 "
 	+ "ORDER BY Priority DESC, RANDOM() "
-	+ "LIMIT (SELECT * FROM RemainingQuota)"
+	+ "LIMIT (SELECT * FROM RemainingQuota)",
+
+	view_register: "SELECT * FROM register R JOIN courses C "
+	+ "ON R.cid = C.cid WHERE a_year=$1 AND semester=$2 AND round = $3"
+	+ "AND sid = $4",
+	create_register: "INSERT INTO register(a_year, semester, round, sid, cid) "
+	+ "VALUES($1, $2, $3, $4, $5)",
+	delete_register: 'DELETE FROM Register WHERE cid = $1 AND sid = $2 '
+	+ "AND a_year = $3 AND semester =$4 and round=$5"
+
 
 
 }
