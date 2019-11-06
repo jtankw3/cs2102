@@ -12,6 +12,8 @@ var sess = {};
 var acad_year;
 var semester;
 var reg_round;
+var degree1;
+var degree2;
 
 function initRouter(app) {
 	// Landing Page Get
@@ -208,7 +210,18 @@ function initRouter(app) {
 	//GET for Student
 	app.get('/student_homepage', function(req, res, next){
 		check_login(res, 'student')
-		res.render('student_homepage', { title: 'Student Homepage' });
+		var sid =  sess["uid"];
+		var sql_query1 = "SELECT dname1 FROM enrolledstudents WHERE sid='" + sid + "'";
+		var sql_query2 = "SELECT dname2 FROM enrolledstudents WHERE sid='" + sid + "'";
+		pool.query(sql_query1, (err, data1) => {
+			pool.query(sql_query2, (err, data2) => {
+				degree1 = data1.rows[0].dname1;
+				degree2 = data2.rows[0].dname2;
+				console.log(degree1);
+				console.log(degree2);
+				res.render('student_homepage', { title: 'Student Homepage' });
+			});
+		});
 	});
 
 	// Get for Success
@@ -469,8 +482,15 @@ function initRouter(app) {
 
 	app.get('/degree_requirements', function(req, res, next) {
 		check_login(res, 'student')
-		pool.query(sql_query2, (err, data) => {
-			res.render('degree_requirements', { title: 'Degree Requirements', data: data.rows });
+		var degree_1 = degree1;
+		var degree_2 = degree2;
+		console.log(degree1);
+		var sql_query1 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree_1 + "'";
+		var sql_query2 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree_2 + "'";
+		pool.query(sql_query1, (err, data1) => {
+			pool.query(sql_query2, (err, data2) => {
+				res.render('degree_requirements', {title: 'Degree Requirements', data1: data1.rows, data2: data2.rows});
+			});
 		});
 	});
 

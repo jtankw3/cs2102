@@ -6,19 +6,38 @@
 </head>
 <body>
 <% include partials/menu %>
-<p>Your degree requirements:</p>
+<h2>Your degree requirements:</h2>
 <table class="table">
     <thead>
+    <h4>First Degree:</h4>
     <tr>
         <th scope="col">Course Code</th>
         <th scope="col">Type</th>
     </tr>
     </thead>
     <tbody>
-    <% for(var i=0; i<data.length; i++) { %>
+    <% for(var i=0; i<data1.length; i++) { %>
         <tr>
-            <td><%= data[i].required_cid%></td>
-            <td><%= data[i].type%></td>
+            <td><%= data1[i].required_cid%></td>
+            <td><%= data1[i].type%></td>
+        </tr>
+    <% } %>
+    </tbody>
+</table>
+<br>
+<table class="table">
+    <thead>
+    <h4>Second Degree:</h4>
+    <tr>
+        <th scope="col">Course Code</th>
+        <th scope="col">Type</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% for(var i=0; i<data2.length; i++) { %>
+        <tr>
+            <td><%= data2[i].required_cid%></td>
+            <td><%= data2[i].type%></td>
         </tr>
     <% } %>
     </tbody>
