@@ -23,16 +23,17 @@ function initRouter(app) {
 				res.redirect('/student_homepage')
 			}
 		} else {
-				getCurrentPeriod(app);
+			getCurrentPeriod(req, res, (req, res) => {
 				if (acad_year == null) {
-					res.render('login', {title: 'RegMod', message: 'There is no ongoing round.',
+					res.render('login', {title: 'RegMod Login', message: 'There is no ongoing round.',
 					subtext: 'Do not share your password with anyone!', error: ''})
 				} else {
 					res.render('login', {title: 'RegMod Login', subtext: 'Do not share your password with anyone!', error: '',
 						message: "Currently ongoing: AY" + acad_year + " Sem " + semester + " Round " + reg_round });
 				}
-			}
-		});
+			});
+		}
+	});
 
 	// Landing Page Post
 	app.post('/', function(req, res, next) {
@@ -42,13 +43,13 @@ function initRouter(app) {
 			if (result.rows[0] == null) {
 				pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
 					if (result1.rows[0] == null) {
-						res.render('', { title: 'Login', subtext: '', error: 'UID does not exist.', message:''})
+						res.render('login', { title: 'RegMod Login', subtext: '', error: 'UID does not exist.', message:''})
 					} else if (result1.rows[0].password == [password]) {
 						sess.uid = uid;
 						sess.type = "student"
 						res.redirect('/student_homepage')
 					} else {
-						res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.', message: ''})
+						res.render('login', { title: 'RegMod Login', subtext: '', error: 'Wrong password.', message: ''})
 					}
 				});
 			} else {
@@ -57,7 +58,7 @@ function initRouter(app) {
 					sess.type = "admin"
 					res.redirect('/admin_homepage')
 				} else {
-					res.render('', { title: 'Login', subtext: '', error: 'Wrong password'})
+					res.render('login', { title: 'RegMod Login', subtext: '', message:'', error: 'Wrong password'})
 				}
 			}
 		});
@@ -143,49 +144,46 @@ function initRouter(app) {
 	});
 
 	app.post('/admin_allocate_auto', function(req, res, next) {
-		getCurrentPeriod(app);
-			var cid = req.query.cid.toUpperCase();
+		getCurrentPeriod(req, res, (req, res) => {
+		 	var cid = req.query.cid.toUpperCase();
 			var a_year = req.query.a_year.toUpperCase();
 			var sem = req.query.semester.toUpperCase();
 
 			console.log(cid, a_year, sem);
 			console.log(acad_year, semester)
 
-		if (acad_year == null || acad_year != a_year || semester != sem) {
-			console.log("not equal")
-			res.redirect('/admin_allocate_insert_error');
-		} else {
-		  pool.query(sql_query.query.calculate_priority,
-					[cid, acad_year, semester, reg_round], (err, data) => {
-		    if(err) {
-		      console.error(err);
-					res.render('admin_allocate_insert', {
-						subtext: "An error occured, please proceed with manual allocation."});
-				} else {
-					console.log(cid, acad_year, semester, reg_round, sql_query.query.calculate_priority);
-					console.log(data)
-					console.log(data.rows)
-					for (var i=0; i<data.rows.length; i++) {
-						console.log(data.rows[i].sid)
-						var err_detected = false;
-						pool.query(sql_query.query.add_allocated_student,
-								[data.rows[i].sid, cid, acad_year, semester], (err, data2) => {
-					    if(err) {
-					      console.error(err);
-								err_detected = true
-								res.render('admin_allocate_insert', {
-									subtext: "An error occured, please proceed with manual allocation."});
+			if (acad_year == null || acad_year != a_year || semester != sem) {
+				console.log("not equal")
+				res.redirect('/admin_allocate_insert_error');
+			} else {
+				pool.query(sql_query.query.calculate_priority,
+						[cid, acad_year, semester, reg_round], (err, data) => {
+					if(err) {
+						console.error(err);
+						res.render('admin_allocate_insert', {
+							subtext: "An error occured, please proceed with manual allocation."});
+					} else {
+						for (var i=0; i<data.rows.length; i++) {
+							var err_detected = false;
+							pool.query(sql_query.query.add_allocated_student,
+									[data.rows[i].sid, cid, acad_year, semester], (err, data2) => {
+								if(err) {
+									console.error(err);
+									err_detected = true
+									res.render('admin_allocate_insert', {
+										subtext: "An error occured, please proceed with manual allocation."});
+								}
+							});
+							if (err_detected) {
+								break;
 							}
-						});
-						if (err_detected) {
-							break;
 						}
+						res.redirect('/admin_allocate_select?cid=' + cid +"&a_year="
+							+ acad_year + "&semester=" + semester);
 					}
-					res.redirect('/admin_allocate_select?cid=' + cid +"&a_year="
-						+ acad_year + "&semester=" + semester);
-				}
-			});
-		}
+				});
+			}
+		});
 	});
 
 	// GET for Admin
@@ -462,15 +460,17 @@ function initRouter(app) {
 			//res.render('', { title: 'Login' , subtext: 'Do not share your password with anyone!', error:''});
 			res.redirect('/')
 	});
+}
 
-};
-function getCurrentPeriod(app) {
+function getCurrentPeriod(req, res, callback) {
 	pool.query(sql_query.query.get_period, (err, data) => {
 		if(data.rows[0] != null) {
 			acad_year = data.rows[0].a_year;
 			semester = data.rows[0].semester;
 			reg_round = data.rows[0].round;
 		}
+		console.log(req.query);
+		callback(req, res)
 	});
 }
 module.exports = initRouter;
