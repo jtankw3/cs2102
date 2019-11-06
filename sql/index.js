@@ -58,7 +58,10 @@ sql.query = {
 	+ "= cid WHERE requiring_cid = $1",
 	view_requirements: "SELECT required_cid, type FROM requirements WHERE name = $1",
 
-	get_degrees: "SELECT dname1, dname2 FROM EnrolledStudents where sid=$1"
+	get_degrees: "SELECT dname1, dname2 FROM EnrolledStudents where sid=$1",
+
+	check_apw: "SELECT password FROM Administrators where aid = $1 AND password = $2",
+	update_apw: "UPDATE Administrators SET password = $1 WHERE aid = $2"
 }
 
 module.exports = sql
