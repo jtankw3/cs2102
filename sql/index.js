@@ -24,7 +24,7 @@ sql.query = {
 
 	create_admin: 'INSERT INTO Administrators(aid,name) VALUES($1,$2) ON CONFLICT(aid) DO UPDATE SET aid = $1, name = $2',
 	view_admin: 'SELECT * FROM Administrators',
-	edit_admin: 'DELETE FROM Accept WHERE cid = $1 sid = $2 CASCADE',
+	delete_admins: 'DELETE FROM Administrators WHERE aid = $1',
 
 	calculate_priority: "With CoreReq AS (SELECT * FROM Requirements WHERE type = 'core' and required_cid = $1), "
 	+ "RemainingQuota as (SELECT quota - (SELECT COUNT(*) FROM Accept WHERE cid = $1 "
@@ -37,9 +37,9 @@ sql.query = {
 	+ "FROM (SELECT * FROM Register WHERE (sid, cid) not in (select sid, cid from accept)) R1 NATURAL JOIN EnrolledStudents E1 "
 	+ "WHERE R1.cid = $1 AND a_year = $2 AND semester = $3 AND round = $4 "
 	+ "ORDER BY Priority DESC, RANDOM() "
-	+ "LIMIT (SELECT * FROM RemainingQuota)",
+	+ "LIMIT (SELECT * FROM RemainingQuota)"
 
-	delete_admins: 'DELETE FROM Administrators WHERE aid = $1'
+
 }
 
 

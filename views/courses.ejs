@@ -33,7 +33,7 @@
             <td><%= data[i].quota%></td>
             <td><%= data[i].credits%></td>
             <td><%= data[i].c_admin%></td>
-            <td><a href="/course_creation" >Edit</a></td>
+            <td><button type="button" onclick="location.href='/course_creation' ">Edit</button></td>
     <td><form action="delete_course?cid=<%= data[i].cid %>&name=<%= data[i].name %>&quota=<%= data[i].quota%>&credits=<%= data[i].credits%>&c_admin=<%= data[i].c_admin%>" method="post">
     <input type="submit" name="delete_course" value="Delete" /></form></td>
 

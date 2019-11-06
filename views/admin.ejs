@@ -27,7 +27,7 @@
         <tr>
             <td><%= data[i].aid%></td>
             <td><%= data[i].name%></td>
-            <td><a href="/admin_creation" >Edit</a></td>
+            <td><button type="button" onclick="location.href='/admin_creation' ">Edit</button></td>
     <td><form action="delete_admin?aid=<%= data[i].aid %>" method="post">
     <input type="submit" name="delete_admin" value="Delete" /></form></td>
         </tr>
