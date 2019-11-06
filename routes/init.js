@@ -46,13 +46,13 @@ function initRouter(app) {
 			if (result.rows[0] == null) {
 				pool.query('SELECT "password" FROM EnrolledStudents WHERE "sid" = $1', [uid], (err, result1) => {
 					if (result1.rows[0] == null) {
-						res.render('', { title: 'Login', subtext: '', error: 'UID does not exist.'})
+						res.render('', { title: 'Login', subtext: '', error: 'UID does not exist.', message:''})
 					} else if (result1.rows[0].password == [password]) {
 						sess.uid = uid;
 						sess.type = "student"
 						res.redirect('/student_homepage')
 					} else {
-						res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.'})
+						res.render('login', { title: 'Login', subtext: '', error: 'Wrong password.', message: ''})
 					}
 				});
 			} else {
@@ -340,11 +340,22 @@ function initRouter(app) {
 		pool.query(insert_query, (err, data) => {
 			//res.redirect('/student_homepage')
 			if(err) {
+				if(err.message == "Prerequisite not fulfilled")
+				{
+					res.render('course_registration', { title: 'Course Registration' , error: 'You have not fulfilled the prerequisites for this module.'});
+				}
+				if(err.message == "Course selected have clashing examinations")
+				{
+					res.render('course_registration', { title: 'Course Registration' , error: 'The timing of the examination for this course clashes with another you have registered for.'});
+				}
+				if(err.message == "Module Limit Exceeded")
+				{
+					res.render('course_registration', { title: 'Course Registration' , error: 'You have exceeded the maximum number of courses you can take this semester.'});
+				}
 				var error = err;
-				console.log(error);
 				res.render('course_registration', { title: 'Course Registration' , error: 'You either have not fulfilled the prerequisites for this module or you have exceeded the maximum modules or the final exams clash. We do not know which :)'});
 			} else {
-				res.redirect('/about', );
+				res.redirect('/success', );
 			}
 		});
 	});
