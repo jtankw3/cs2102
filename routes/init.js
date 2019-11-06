@@ -217,7 +217,7 @@ function initRouter(app) {
 			pool.query(sql_query2, (err, data2) => {
 				degree1 = data1.rows[0].dname1;
 				degree2 = data2.rows[0].dname2;
-				console.log(degree1);
+				console.log("lol" + degree1);
 				console.log(degree2);
 				res.render('student_homepage', { title: 'Student Homepage' });
 			});
@@ -490,28 +490,32 @@ function initRouter(app) {
 		});
 	});
 
-
-
 	// GET for View degree requirements
 	var degree = 'Computer Science'
 	var sql_query2 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree + "'";
 
 	app.get('/degree_requirements', function(req, res, next) {
 		check_login(res, 'student')
-		var degree_1 = degree1;
-		var degree_2 = degree2;
-		console.log(degree1);
-		var sql_query1 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree_1 + "'";
-		var sql_query2 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree_2 + "'";
-		pool.query(sql_query1, (err, data1) => {
-			pool.query(sql_query2, (err, data2) => {
-				res.render('degree_requirements', {title: 'Degree Requirements', data1: data1.rows, data2: data2.rows});
+		var sid = sess.uid;
+		pool.query(sql_query.query.get_degrees, [sid], (err, data) => {
+			var degree1 = data.rows[0].dname1;
+			var degree2 = data.rows[0].dname2;
+			console.log(degree1, degree2)
+
+			pool.query(sql_query.query.view_requirements, [degree1],
+				(err, data1) => {
+						pool.query(sql_query.query.view_requirements, [degree2],
+							(err, data2) => {
+							res.render('degree_requirements', {title: 'Degree Requirements',
+							data1: data1.rows, data2: data2.rows, degree1: degree1,
+							degree2: degree2});
+						});
+					});
+				});
 			});
-		});
-	});
 
 	app.post('/delete_register', function(req, res, next) {
-		var sid  = req.query.sid.toUpperCase();
+		var sid  = sess.uid;
 		var cid  = req.query.cid.toUpperCase();
 
 		pool.query(sql_query.query.delete_register,
@@ -520,57 +524,59 @@ function initRouter(app) {
 			});
 	});
 
-	// GET for drop course
-	app.get('/drop_course', function(req, res, next) {
-		check_login(res, 'student')
-		res.render('drop_course', { title: 'Drop Course' });
-	});
-
 	// POST for drop course
-	var sql_query1 = 'DELETE FROM accept WHERE sid =';
 	app.post('/drop_course', function(req, res, next) {
 		// Retrieve Information
-		var cid  = req.body.cid;
+		var cid  = req.query.cid;
 		var sid = sess.uid;
 
-		// Construct Specific SQL Query
-		var drop_query = sql_query1 + "'" + sid + "'" + "AND cid ='" + cid + "'";
+		pool.query(sql_query.query.drop_accept, [sid, cid], (err, result) => {
+				res.redirect('/view_course')
 
-		pool.query("SELECT * FROM Accept WHERE sid = '" + sid +"' AND cid = '" + cid + "'", (err, result) => {
-			if (err) {
-				res.redirect('/drop_course')
-			} else if (result.rows[0] == null) {
-				res.redirect('/drop_course')
-				//res.render('login', { title: 'Login', subtext: '', error: 'UID does not exist.'})
-			} else {
-				pool.query(drop_query, (err, data) => {
-					if(err) {
-						res.redirect('/drop_course')
-					}
-					else {
-						res.redirect('/success', );
-					}
-				});
-			}
 		});
-
 	});
 
 	// GET for view course
 	app.get('/view_course', function(req, res, next) {
 		check_login(res, 'student')
 		var sid = sess.uid;
-		pool.query('SELECT A.cid, C.name FROM Accept A JOIN Courses C ON A.cid = C.cid WHERE A.sid =' + "'" + sid + "'", (err, data) => {
-		    pool.query('SELECT A.cid, C.name FROM Taken A JOIN Courses C ON A.cid = C.cid WHERE A.sid =' + "'" + sid + "'", (err2, data2) => {
+		pool.query(sql_query.query.view_accept, [sid], (err, data) => {
+		    pool.query(sql_query.query.view_taken, [sid], (err2, data2) => {
                 res.render('view_course', {title: 'View Courses', data: data.rows, data2: data2.rows});
             });
 		});
 	});
 
+	// GET for view course
+	app.get('/student_prereq', function(req, res, next) {
+		check_login(res, 'student')
+		res.render('student_prereq', {message: '', error: '', course: '', data: []});
+	});
+
+	app.post('/student_prereq', function(req, res, next) {
+		var cid = req.body.cid.toUpperCase();
+		pool.query(sql_query.query.search_prereq, [cid],
+			(err, data) => {
+				if (err) {
+					console.error(err)
+					res.render('student_prereq', { message: '',
+						error: "An error occured, please check your input and try again.",
+					course: '', data: [] });
+				} else if (data.rows[0] == null) {
+					res.render('student_prereq', {
+						message:'This course has no prerequisites', error: '',
+						course: "for " + cid, data: data.rows });
+					} else {
+
+				res.render('student_prereq', { message:'', error: '',
+					course: "for " + cid, data: data.rows });
+				}
+			});
+	});
+
 	app.get('/logout', function(req, res, next) {
 			sess.uid = null
 			sess.type = null
-			//res.render('', { title: 'Login' , subtext: 'Do not share your password with anyone!', error:''});
 			res.redirect('/')
 	});
 }
@@ -587,8 +593,8 @@ function getCurrentPeriod(req, res, callback) {
 }
 
 function check_login(res, type) {
-	// if (sess.uid == null || sess.type != type) {
-	// 	res.redirect('/')
-	// }
+	if (sess.uid == null || sess.type != type) {
+		res.redirect('/')
+	}
 }
 module.exports = initRouter;

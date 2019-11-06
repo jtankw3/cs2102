@@ -25,7 +25,7 @@
             <td><%= data[i].cid%></td>
             <td><%= data[i].name%></td>
             <td><%= data[i].credits%></td>
-            <td><form action="delete_register?sid=<%= data[i].sid %>&cid=<%= data[i].cid%>" method="post">
+            <td><form action="delete_register?&cid=<%= data[i].cid%>" method="post">
             <input type="submit" name="delete_register" value="X" /></form></td>
         </tr>
     <% } %>
