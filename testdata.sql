@@ -86,7 +86,8 @@ CREATE TABLE Register(
 	cid varchar(7),
 	PRIMARY KEY(a_year, semester, round, cid, sid),
   	FOREIGN KEY(a_year, semester, round) REFERENCES RegisterPeriods(a_year, semester, round),
-	FOREIGN KEY(sid) REFERENCES EnrolledStudents(sid),
+	FOREIGN KEY(sid) REFERENCES EnrolledStudents(sid)
+	ON DELETE CASCADE,
 	FOREIGN KEY(cid) REFERENCES Courses(cid)
 );
 
@@ -97,7 +98,8 @@ CREATE TABLE Accept(
 	a_year integer,
   	semester integer,
 	PRIMARY KEY(sid, cid),
-	FOREIGN KEY(sid) REFERENCES EnrolledStudents(sid),
+	FOREIGN KEY(sid) REFERENCES EnrolledStudents(sid)
+	ON DELETE CASCADE,
 	FOREIGN KEY(cid) REFERENCES Courses(cid)
 );
 
@@ -106,7 +108,8 @@ CREATE TABLE Taken(
 	sid varchar(20),
 	cid varchar(7),
 	PRIMARY KEY(sid, cid),
-	FOREIGN KEY(sid) REFERENCES EnrolledStudents(sid),
+	FOREIGN KEY(sid) REFERENCES EnrolledStudents(sid)
+	ON DELETE CASCADE,
 	FOREIGN KEY(cid) REFERENCES Courses(cid)
 );
 
@@ -229,64 +232,63 @@ CREATE TRIGGER pre_req
 		EXECUTE PROCEDURE max_modules();
 
 /* use A1000001Z - A1000005Z for testing, A1000003Z has taken all prereq */
-INSERT INTO Administrators VALUES('B1000001X', 'Administrator1', 'password1');
-INSERT INTO Administrators VALUES('B1000002X', 'Administrator2', 'password2');
-INSERT INTO Administrators VALUES('B1000003X', 'Administrator3', 'password3');
-INSERT INTO Administrators VALUES('B1000004X', 'Administrator4', 'password4');
-INSERT INTO Administrators VALUES('B1000005X', 'Administrator5', 'password5');
-
+INSERT INTO Administrators VALUES('B1000001X', 'ADMINISTRATOR1', 'password1');
+INSERT INTO Administrators VALUES('B1000002X', 'ADMINISTRATOR2', 'password2');
+INSERT INTO Administrators VALUES('B1000003X', 'ADMINISTRATOR3', 'password3');
+INSERT INTO Administrators VALUES('B1000004X', 'ADMINISTRATOR4', 'password4');
+INSERT INTO Administrators VALUES('B1000005X', 'ADMINISTRATOR5', 'password5');
 
 /* Used smaller quota for testing */
-INSERT INTO Courses VALUES('CS1010', 'Programming', 5, 4, 'B1000001X');
-INSERT INTO Courses VALUES('CS1011', 'Programming2', 5, 4, 'B1000001X');
-INSERT INTO Courses VALUES('CS1012', 'Programming3', 5, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1013', 'Programming4', 10, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1014', 'Programming5', 20, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1015', 'Programming6', 20, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1016', 'Programming7', 30, 4, 'B1000004X');
-INSERT INTO Courses VALUES('CS1017', 'Programming8', 5, 4, 'B1000004X');
-INSERT INTO Courses VALUES('CS1018', 'Programming9', 5, 4, 'B1000001X');
-INSERT INTO Courses VALUES('CS1019', 'Programming10', 5, 4, 'B1000001X');
-INSERT INTO Courses VALUES('CS1020', 'Programming11', 5, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1021', 'Programming12', 10, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1022', 'Programming13', 20, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1023', 'Programming14', 20, 4, 'B1000002X');
-INSERT INTO Courses VALUES('CS1024', 'Programming15', 30, 4, 'B1000004X');
-INSERT INTO Courses VALUES('CS1025', 'Programming16', 5, 4, 'B1000004X');
-INSERT INTO Courses VALUES('GET1017', 'General1', 5, 4, 'B1000004X');
-INSERT INTO Courses VALUES('GET1018', 'General2', 5, 4, 'B1000004X');
+INSERT INTO Courses VALUES('CS1010', 'PROGRAMMING', 5, 4, 'B1000001X');
+INSERT INTO Courses VALUES('CS1011', 'PROGRAMMING2', 5, 4, 'B1000001X');
+INSERT INTO Courses VALUES('CS1012', 'PROGRAMMING3', 5, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1013', 'PROGRAMMING4', 10, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1014', 'PROGRAMMING5', 20, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1015', 'PROGRAMMING6', 20, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1016', 'PROGRAMMING7', 30, 4, 'B1000004X');
+INSERT INTO Courses VALUES('CS1017', 'PROGRAMMING8', 5, 4, 'B1000004X');
+INSERT INTO Courses VALUES('CS1018', 'PROGRAMMING9', 5, 4, 'B1000001X');
+INSERT INTO Courses VALUES('CS1019', 'PROGRAMMING10', 5, 4, 'B1000001X');
+INSERT INTO Courses VALUES('CS1020', 'PROGRAMMING11', 5, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1021', 'PROGRAMMING12', 10, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1022', 'PROGRAMMING13', 20, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1023', 'PROGRAMMING14', 20, 4, 'B1000002X');
+INSERT INTO Courses VALUES('CS1024', 'PROGRAMMING15', 30, 4, 'B1000004X');
+INSERT INTO Courses VALUES('CS1025', 'PROGRAMMING16', 5, 4, 'B1000004X');
+INSERT INTO Courses VALUES('GET1017', 'GENERAL1', 5, 4, 'B1000004X');
+INSERT INTO Courses VALUES('GET1018', 'GENERAL2', 5, 4, 'B1000004X');
 
 /* adds into degree list and requirements list */
-CALL add_requirements('Computer Science', 'CS1010', 'core');
-CALL add_requirements('Computer Science', 'CS1011', 'core');
-CALL add_requirements('Computer Engineering', 'CS1012', 'core');
-CALL add_requirements('Computer Engineering', 'CS1013', 'core');
-CALL add_requirements('Computer Engineering', 'CS1017', 'core');
-CALL add_requirements('Information Systems', 'CS1014', 'core');
-CALL add_requirements('Information Systems', 'CS1015', 'core');
-CALL add_requirements('Information Systems', 'GET1017', 'general');
+CALL add_requirements('COMPUTER SCIENCE', 'CS1010', 'CORE');
+CALL add_requirements('COMPUTER SCIENCE', 'CS1011', 'CORE');
+CALL add_requirements('COMPUTER ENGINEERING', 'CS1012', 'CORE');
+CALL add_requirements('COMPUTER ENGINEERING', 'CS1013', 'CORE');
+CALL add_requirements('COMPUTER ENGINEERING', 'CS1017', 'CORE');
+CALL add_requirements('INFORMATION SYSTEMS', 'CS1014', 'CORE');
+CALL add_requirements('INFORMATION SYSTEMS', 'CS1015', 'CORE');
+CALL add_requirements('INFORMATION SYSTEMS', 'GET1017', 'GENERAL');
 
 /* Varying priority */
-INSERT INTO EnrolledStudents VALUES('A1000001Z', 'Student1', 'password1', 2015, 'Computer Engineering', 'Computer Science');
-INSERT INTO EnrolledStudents VALUES('A1000002Z', 'Student2', 'password2', 2016, 'Information Systems', null);
-INSERT INTO EnrolledStudents VALUES('A1000003Z', 'Student3', 'password3', 2017, 'Computer Science', null);
-INSERT INTO EnrolledStudents VALUES('A1000004Z', 'Student4', 'password4', 2018, 'Computer Engineering', null);
-INSERT INTO EnrolledStudents VALUES('A1000005Z', 'Student5', 'password5', 2014, 'Information Systems', 'Computer Engineering');
-INSERT INTO EnrolledStudents VALUES('A1000006Z', 'Student6', 'password6', 2015, 'Computer Science', null);
-INSERT INTO EnrolledStudents VALUES('A1000007Z', 'Student7', 'password7', 2016, 'Computer Engineering', null);
-INSERT INTO EnrolledStudents VALUES('A1000008Z', 'Student8', 'password8', 2017, 'Information Systems', null);
-INSERT INTO EnrolledStudents VALUES('A1000009Z', 'Student9', 'password9', 2018, 'Computer Science', null);
-INSERT INTO EnrolledStudents VALUES('A1000010Z', 'Student10', 'password10', 2014, 'Computer Engineering', null);
-INSERT INTO EnrolledStudents VALUES('A1000011Z', 'Student11', 'password11', 2015, 'Information Systems', null);
-INSERT INTO EnrolledStudents VALUES('A1000012Z', 'Student12', 'password12', 2016, 'Computer Science', null);
-INSERT INTO EnrolledStudents VALUES('A1000013Z', 'Student13', 'password13', 2017, 'Computer Engineering', null);
-INSERT INTO EnrolledStudents VALUES('A1000014Z', 'Student14', 'password14', 2018, 'Information Systems', null);
-INSERT INTO EnrolledStudents VALUES('A1000015Z', 'Student15', 'password15', 2014, 'Computer Science', 'Computer Engineering');
-INSERT INTO EnrolledStudents VALUES('A1000016Z', 'Student16', 'password16', 2015, 'Computer Engineering', 'Information Systems');
-INSERT INTO EnrolledStudents VALUES('A1000017Z', 'Student17', 'password17', 2016, 'Information Systems', null);
-INSERT INTO EnrolledStudents VALUES('A1000018Z', 'Student18', 'password18', 2017, 'Computer Science', null);
-INSERT INTO EnrolledStudents VALUES('A1000019Z', 'Student19', 'password19', 2018, 'Computer Engineering', null);
-INSERT INTO EnrolledStudents VALUES('A1000020Z', 'Student20', 'password20', 2014, 'Information Systems', 'Computer Science');
+INSERT INTO EnrolledStudents VALUES('A1000001Z', 'STUDENT1', 'password1', 2015, 'COMPUTER ENGINEERING', 'COMPUTER SCIENCE');
+INSERT INTO EnrolledStudents VALUES('A1000002Z', 'STUDENT2', 'password2', 2016, 'INFORMATION SYSTEMS', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000003Z', 'STUDENT3', 'password3', 2017, 'COMPUTER SCIENCE', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000004Z', 'STUDENT4', 'password4', 2018, 'COMPUTER ENGINEERING', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000005Z', 'STUDENT5', 'password5', 2014, 'INFORMATION SYSTEMS', 'COMPUTER ENGINEERING');
+INSERT INTO EnrolledStudents VALUES('A1000006Z', 'STUDENT6', 'password6', 2015, 'COMPUTER SCIENCE', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000007Z', 'STUDENT7', 'password7', 2016, 'COMPUTER ENGINEERING', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000008Z', 'STUDENT8', 'password8', 2017, 'INFORMATION SYSTEMS', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000009Z', 'STUDENT9', 'password9', 2018, 'COMPUTER SCIENCE', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000010Z', 'STUDENT10', 'password10', 2014, 'COMPUTER ENGINEERING', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000011Z', 'STUDENT11', 'password11', 2015, 'INFORMATION SYSTEMS', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000012Z', 'STUDENT12', 'password12', 2016, 'COMPUTER SCIENCE', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000013Z', 'STUDENT13', 'password13', 2017, 'COMPUTER ENGINEERING', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000014Z', 'STUDENT14', 'password14', 2018, 'INFORMATION SYSTEMS', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000015Z', 'STUDENT15', 'password15', 2014, 'COMPUTER SCIENCE', 'COMPUTER ENGINEERING');
+INSERT INTO EnrolledStudents VALUES('A1000016Z', 'STUDENT16', 'password16', 2015, 'COMPUTER ENGINEERING', 'INFORMATION SYSTEMS');
+INSERT INTO EnrolledStudents VALUES('A1000017Z', 'STUDENT17', 'password17', 2016, 'INFORMATION SYSTEMS', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000018Z', 'STUDENT18', 'password18', 2017, 'COMPUTER SCIENCE', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000019Z', 'STUDENT19', 'password19', 2018, 'COMPUTER ENGINEERING', NULL);
+INSERT INTO EnrolledStudents VALUES('A1000020Z', 'STUDENT20', 'password20', 2014, 'INFORMATION SYSTEMS', 'COMPUTER SCIENCE');
 
 /* Longer date range for 2019 sem 1 round 3 for testing */
 INSERT INTO RegisterPeriods VALUES(2018, 2, 1, '2018-08-10 14:00:00', '2018-08-15 18:00:00');

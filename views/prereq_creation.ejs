@@ -19,6 +19,7 @@
 <body>
 
 <h1>Admin: <%= title%></h1>
+<p style="color: red"><%= error%></p>
 <form id="html_form" action="prereq_creation" role="form" method="post">
     <div class="form-group">
         <label for="required_cid">Required Course ID</label>
@@ -29,10 +30,6 @@
         <label for="requiring_cid">Requiring Course ID</label>
         <input type="text" class="form-control" id="requiring_cid" name="requiring_cid" aria-describedby="requiring_cidHelp" placeholder="Enter requiring course ID">
         <small id="requiring_cidHelp" class="form-text text-muted">This is the course which requires a prerequisite.</small>
-    </div>
-    <div class="form-group">
-        <label for="setter">Setter Admin ID</label>
-        <input type="text" class="form-control" id="setter" name="setter" placeholder="Enter course admin's ID">
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
