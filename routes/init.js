@@ -37,7 +37,7 @@ function initRouter(app) {
 
 	// Landing Page Post
 	app.post('/', function(req, res, next) {
-		var uid = req.body.uid;
+		var uid = req.body.uid.toUpperCase();
 		var password = req.body.password;
 		pool.query('SELECT "password" FROM Administrators WHERE "aid" = $1', [uid], (err, result) => {
 			if (result.rows[0] == null) {
@@ -67,7 +67,8 @@ function initRouter(app) {
 	// add all app.get app.post things here
 
 	app.get('/admin_allocate_search', function(req, res, next) {
-			res.render('admin_allocate_search', { title: 'Allocated Students',
+		check_login(res, 'admin');
+		res.render('admin_allocate_search', { title: 'Allocated Students',
 		subtext: "" });
 	});
 
@@ -89,6 +90,7 @@ function initRouter(app) {
 	});
 
 	app.get('/admin_allocate_select', function(req, res, next) {
+		check_login(res, 'admin')
 		pool.query(sql_query.query.allocated_students,[req.query.cid,
 			req.query.a_year,req.query.semester],
 			(err, data) => {
@@ -114,14 +116,19 @@ function initRouter(app) {
 	//POST for admin deletion
 	app.post('/delete_admin', function(req, res, next) {
 		var aid = req.query.aid;
-		pool.query(sql_query.query.delete_admins,[aid],
-			(err, data) => {
-				res.redirect('/admin')
+		pool.query(sql_query.query.delete_admins, [aid], (err, data) => {
+				if (err) {
+					console.error(err)
+					res.redirect('/admin_error')
+				} else{
+					res.redirect('/admin')
+				}
 			});
 	});
 
 	app.get('/admin_allocate_insert', function(req, res, next) {
-		res.render('admin_allocate_insert', {subtext: ""});
+		check_login(res, 'admin')
+		res.render('admin_allocate_insert', {error: ''});
 	});
 
 	app.post('/admin_allocate_insert', function(req, res, next) {
@@ -135,7 +142,7 @@ function initRouter(app) {
 	    if(err) {
 	      console.error(err['detail']);
 				res.render('admin_allocate_insert', {
-					subtext: "An error occured, please check your input and try again."});
+					error: "An error occured, please check your input and try again."});
 			} else {
 	    res.redirect('/admin_allocate_select?cid=' + cid
 		+"&a_year=" + a_year + "&semester=" + sem);
@@ -188,16 +195,19 @@ function initRouter(app) {
 
 	// GET for Admin
 	app.get('/admin_allocate_insert_error', function(req, res, next) {
+		check_login(res, 'admin')
 		res.render('admin_allocate_insert_error');
 	});
 
 	// GET for Admin
 	app.get('/admin_homepage', function(req, res, next) {
+		check_login(res, 'admin')
 		res.render('admin_homepage', { title: 'Admin Homepage' });
 	});
 
 	//GET for Student
 	app.get('/student_homepage', function(req, res, next){
+		check_login(res, 'student')
 		res.render('student_homepage', { title: 'Student Homepage' });
 	});
 
@@ -209,25 +219,35 @@ function initRouter(app) {
 
 	// GET for Course Creation
 	app.get('/course_creation', function(req, res, next) {
-		res.render('course_creation', { title: 'Creating/Editing Course' });
+		check_login(res, 'admin')
+		res.render('course_creation', { title: 'Creating/Editing Course',
+		error: '' });
 	});
 
 	// POST for Course Creation
 	app.post('/course_creation', function(req, res, next) {
+		check_login(res, 'admin')
 		// Retrieve Information
 		var cid  = req.body.cid;
 		var c_name = req.body.c_name;
 		var c_quota = req.body.c_quota;
 		var credits = req.body.credits;
-		var c_admin = req.body.c_admin;
+		var c_admin = sess.uid;
 
 		pool.query(sql_query.query.create_course, [cid, c_name, c_quota, credits, c_admin], (err, data) => {
-			res.redirect('/courses')
+			if (err) {
+				console.error(err);
+				res.render('course_creation', { title: 'Creating/Editing Administrators',
+				error: 'An error occured, please check your inputs and try again.'});
+			} else {
+				res.redirect('/courses')
+			}
 		});
 	});
 
 	// GET for Courses
 	app.get('/courses', function(req, res, next) {
+		check_login(res, 'admin')
 		pool.query(sql_query.query.view_course, (err, data) => {
 			res.render('courses', { title: 'View Courses', data: data.rows });
 		});
@@ -243,23 +263,34 @@ function initRouter(app) {
 
 	// GET for Prereq Creation
 	app.get('/prereq_creation', function(req, res, next) {
-		res.render('prereq_creation', { title: 'Creating/Editing Prerequisites' });
+		check_login(res, 'admin')
+		res.render('prereq_creation', { title: 'Creating/Editing Prerequisites',
+	error: '' });
 	});
 
 	// POST for Prereq Creation
 	app.post('/prereq_creation', function(req, res, next) {
 		// Retrieve Information
-		var required_cid  = req.body.required_cid;
-		var requiring_cid  = req.body.requiring_cid;
-		var setter = req.body.setter;
+		var required_cid  = req.body.required_cid.toUpperCase();
+		var requiring_cid  = req.body.requiring_cid.toUpperCase();
+		var setter = sess['uid'];
+		console.log(sess, setter)
 
-		pool.query(sql_query.query.create_prereq, [required_cid, requiring_cid, setter], (err, data) => {
-			res.redirect('/prereq')
+		pool.query(sql_query.query.create_prereq,
+			[required_cid, requiring_cid, setter], (err, data) => {
+				if (err) {
+					console.error(err);
+					res.render('prereq_creation', { title: 'Creating/Editing Prerequisites',
+				error: 'An error occured, please check your inputs and try again.' });
+			} else {
+				res.redirect('/prereq')
+			}
 		});
 	});
 
 	// GET for Prereq
 	app.get('/prereq', function(req, res, next) {
+		check_login(res, 'admin')
 		pool.query(sql_query.query.view_prereq, (err, data) => {
 			res.render('prereq', { title: 'View Prerequisites', data: data.rows });
 		});
@@ -267,8 +298,8 @@ function initRouter(app) {
 
 	// POST for Prereq deletion
 	app.post('/delete_prereq', function(req, res, next) {
-		var required_cid = req.query.required_cid;
-		var requiring_cid = req.query.requiring_cid;
+		var required_cid = req.query.required_cid.toUpperCase();
+		var requiring_cid = req.query.requiring_cid.toUpperCase();
 		pool.query(sql_query.query.delete_prereqs,[required_cid,requiring_cid],
 			(err, data) => {
 				res.redirect('/prereq')
@@ -277,30 +308,45 @@ function initRouter(app) {
 
 	// GET for Student Creation
 	app.get('/student_creation', function(req, res, next) {
-		res.render('student_creation', { title: 'Creating/Editing Students' });
+		check_login(res, 'admin')
+		res.render('student_creation', { title: 'Creating/Editing Students',
+		error: '' });
 	});
 
 	app.post('/student_creation', function(req, res, next) {
 		// Retrieve Information
-		var sid  = req.body.sid;
-		var sname = req.body.sname;
-		var e_year  = req.body.e_year;
-		var dname1 = req.body.dname1;
-		var dname2 = req.body.dname2;
+		var sid  = req.body.sid.toUpperCase();
+		var sname = req.body.sname.toUpperCase();
+		var e_year  = req.body.e_year.toUpperCase();
+		var dname1 = req.body.dname1.toUpperCase();
+		var dname2 = req.body.dname2.toUpperCase();
 
 		if (dname2 == '') {
 			pool.query(sql_query.query.create_student, [sid, sname, e_year, dname1, null], (err, data) => {
+				if(err) {
+					console.error(err);
+					res.render('student_creation', { title: 'Creating/Editing Students',
+					error: 'An error occured, please check your inputs and try again.' });
+				} else {
 				res.redirect('/student')
+				}
 			});
 		} else {
 			pool.query(sql_query.query.create_student, [sid, sname, e_year, dname1, dname2], (err, data) => {
-				res.redirect('/student')
+				if(err) {
+					console.error(err);
+					res.render('student_creation', { title: 'Creating/Editing Students',
+					error: 'An error occured, please check your inputs and try again.' });
+				} else {
+					res.redirect('/student')
+				}
 			});
 		}
 	});
 
 	// GET for Student
 	app.get('/student', function(req, res, next) {
+		check_login(res, 'admin')
 		pool.query(sql_query.query.view_student, (err, data) => {
 			res.render('student', { title: 'View Students', data: data.rows });
 		});
@@ -308,7 +354,8 @@ function initRouter(app) {
 
 	// POST for Student deletion
 	app.post('/drop_student', function(req, res, next) {
-		var sid = req.query.sid;
+		check_login(res, 'admin')
+		var sid = req.query.sid.toUpperCase();
 		pool.query(sql_query.query.drop_students,[sid],
 			(err, data) => {
 				res.redirect('/student')
@@ -317,29 +364,46 @@ function initRouter(app) {
 
 	// GET for Admin Creation
 	app.get('/admin_creation', function(req, res, next) {
-		res.render('admin_creation', { title: 'Creating/Editing Administrators' });
+		check_login(res, 'admin')
+		res.render('admin_creation', { title: 'Creating/Editing Administrators',
+	 	error: ''});
 	});
 
 	// POST for Admin Creation
 	app.post('/admin_creation', function(req, res, next) {
 		// Retrieve Information
-		var aid  = req.body.aid;
-		var name = req.body.name;
+		var aid  = req.body.aid.toUpperCase();
+		var name = req.body.name.toUpperCase();
 
 		pool.query(sql_query.query.create_admin, [aid,name], (err, data) => {
-			res.redirect('/admin')
+			if (err) {
+				console.err(err);
+				res.render('admin_creation', { title: 'Creating/Editing Administrators',
+				error: 'An error occured, please check your inputs and try again.'});
+			} else {
+				res.redirect('/admin')
+			}
 		});
 	});
 
 	// GET for Admin view
 	app.get('/admin', function(req, res, next) {
+		check_login(res, 'admin')
 		pool.query(sql_query.query.view_admin, (err, data) => {
-			res.render('admin', { title: 'View Administrators', data: data.rows });
+			res.render('admin', { title: 'View Administrators', data: data.rows});
+		});
+	});
+
+	app.get('/admin_error', function(req, res, next) {
+		check_login(res, 'admin')
+		pool.query(sql_query.query.view_admin, (err, data) => {
+			res.render('admin_error', { title: 'View Administrators', data: data.rows});
 		});
 	});
 
 	// GET for course_registration
 	app.get('/course_registration', function(req, res, next) {
+		check_login(res, 'student')
 		var sid =  sess["uid"];
 		var a_year = "2019";
 		var semester = "1";
@@ -404,6 +468,7 @@ function initRouter(app) {
 	var sql_query2 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree + "'";
 
 	app.get('/degree_requirements', function(req, res, next) {
+		check_login(res, 'student')
 		pool.query(sql_query2, (err, data) => {
 			res.render('degree_requirements', { title: 'Degree Requirements', data: data.rows });
 		});
@@ -411,6 +476,7 @@ function initRouter(app) {
 
 	// GET for drop course
 	app.get('/drop_course', function(req, res, next) {
+		check_login(res, 'student')
 		res.render('drop_course', { title: 'Drop Course' });
 	});
 
@@ -446,6 +512,7 @@ function initRouter(app) {
 
 	// GET for view course
 	app.get('/view_course', function(req, res, next) {
+		check_login(res, 'student')
 		var sid = sess.uid;
 		pool.query('SELECT A.cid, C.name FROM Accept A JOIN Courses C ON A.cid = C.cid WHERE A.sid =' + "'" + sid + "'", (err, data) => {
 		    pool.query('SELECT A.cid, C.name FROM Taken A JOIN Courses C ON A.cid = C.cid WHERE A.sid =' + "'" + sid + "'", (err2, data2) => {
@@ -472,5 +539,11 @@ function getCurrentPeriod(req, res, callback) {
 		console.log(req.query);
 		callback(req, res)
 	});
+}
+
+function check_login(res, type) {
+	if (sess.uid == null || sess.type != type) {
+		res.redirect('/')
+	}
 }
 module.exports = initRouter;
