@@ -1,64 +1,53 @@
 
-<!DOCTYPE html>
-<div>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #333;
-            text-decoration: none;
-        }
-
-        li {
-            float: right;
-        }
-
-        li a {
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-
-        li a:hover {
-            background-color: #333;
-            text-decoration: none;
-            color:white;
-        }
-
-        li a:hover:not(.active) {
-            background-color: #ddd;
-            text-decoration: none;
-            color:white;
-        }
-
-        .active {
-            background-color: #333;
-            text-decoration: none;
-            color:white;
-        }
-    </style>
-
-<ul>
-    <li><a href="/logout">Logout</a></li>
-    <li><a href="/admin_allocate_search">View Allocations</a></li>
-    <li><a href="/admin">View Admins</a></li>
-    <li><a href="/admin_creation">Add Admins</a></li>
-    <li><a href="/student">View Students</a></li>
-    <li><a href="/student_creation">Add Students</a></li>
-    <li><a href="/prereq">View Prerequisites</a></li>
-    <li><a href="/prereq_creation">Add Prerequisites</a></li>
-    <li><a href="/courses">View Courses</a></li>
-    <li><a href="/course_creation">Add Courses</a></li>
-    <li style="float:left"><a class="active" href="/admin_homepage">RegMod</a></li>
-</ul>
-
-</div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/admin_homepage">RegMod</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Students
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class ="dropdown-item" href="/student">View Students</a>
+                    <a class ="dropdown-item" href="/student_creation">Add/Edit Students</a>
+                </div>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Admins
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class ="dropdown-item" href="/admin">View Admins</a>
+                    <a class ="dropdown-item" href="/admin_creation">Add/Edit Admins</a>
+                </div>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Courses
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class ="dropdown-item" href="/courses">View Courses</a>
+                    <a class ="dropdown-item" href="/course_creation">Add/Edit Courses</a>
+                </div>
+            </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Prerequisites
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class ="dropdown-item" href="/prereq">View Prerequisites</a>
+                    <a class ="dropdown-item" href="/prereq_creation">Add/Edit Prerequisites</a>
+                </div>
+            </div>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin_allocate_search">View Allocations</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log Out</a>
+            </li>
+        </ul>
+    </div>
+</nav>
