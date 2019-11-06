@@ -125,63 +125,55 @@ CREATE TABLE FinalExams(
 
 /* Total participation constraint for degree requirements */
 CREATE OR REPLACE FUNCTION deg_func()
-	RETURNS TRIGGER AS $$ BEGIN
-	IF EXISTS (
-		SELECT name
-		FROM Requirements
-		WHERE name = NEW.name)
-	THEN RETURN NEW;
-	ELSE RAISE
-		'Cannot add degree without requirements';
-		RETURN NULL;
-	END IF;
-	END; $$ LANGUAGE plpgsql;
+RETURNS TRIGGER AS $$ BEGIN
+IF EXISTS (
+SELECT name
+FROM Requirements
+WHERE name = NEW.name)
+THEN RETURN NEW;
+ELSE RAISE
+'Cannot add degree without requirements';
+RETURN NULL;
+END IF;
+END; $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS deg_trig ON Degrees;
 CREATE TRIGGER deg_trig
 BEFORE INSERT OR UPDATE ON Degrees
-	FOR EACH ROW
-	EXECUTE FUNCTION deg_func();
+FOR EACH ROW
+EXECUTE FUNCTION deg_func();
 
-CREATE OR REPLACE PROCEDURE add_requirements (
-	dname 					varchar(50),
-	required_cid 	varchar(7),
-	type 					varchar(50)) AS
-'BEGIN
-	INSERT INTO Requirements VALUES (dname, required_cid, type);
-	IF NOT EXISTS (SELECT 1 FROM Degrees WHERE name = dname)
-	THEN INSERT INTO Degrees VALUES (dname);
-	END IF;
-	END;'
-LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS deg_trig ON Degrees;
+CREATE TRIGGER deg_trig
+BEFORE INSERT OR UPDATE ON Degrees
+FOR EACH ROW
+EXECUTE FUNCTION deg_func();
 
 /* Trigger for final exam clash checking */
 CREATE OR REPLACE FUNCTION exam_clashes()
 RETURNS TRIGGER AS $$ BEGIN
-	IF EXISTS (SELECT 1 FROM FinalExams F1
-		JOIN FinalExams F2
-		ON (F1.s_time >= F2.s_time AND F1.s_time < F2.e_time
-		OR F1.e_time > F2.s_time AND F1.e_time <= F2.e_time)
-		AND F1.cid <> F2.cid
-		WHERE F1.cid = NEW.cid AND (
-		F2.cid in (
-			SELECT cid
-			FROM Accept A
-			WHERE A.sid = NEW.sid
-				AND A.a_year = NEW.a_year
-				AND A.semester = NEW.semester)
-		OR F2.cid in (
-			SELECT cid
-			FROM Register R
-			WHERE R.sid = NEW.sid
-				AND R.a_year = NEW.a_year
-				AND R.semester = NEW.semester
-				AND R.round = NEW.round)))
-		THEN
-		RAISE 'Course selected have clashing examinations';
-		RETURN NULL;
-		ELSE RETURN NEW;
-		END IF;
+IF EXISTS (SELECT 1 FROM FinalExams F1
+JOIN FinalExams F2
+ON (F1.s_time >= F2.s_time AND F1.s_time < F2.e_time
+OR F1.e_time > F2.s_time AND F1.e_time <= F2.e_time)
+AND F1.cid <> F2.cid
+WHERE F1.cid = NEW.cid AND (
+F2.cid in (
+SELECT cid
+FROM Accept A
+WHERE A.sid = NEW.sid
+AND A.a_year = NEW.a_year
+AND A.semester = NEW.semester)
+OR F2.cid in (
+SELECT cid
+FROM Register R
+WHERE R.sid = NEW.sid AND R.a_year = NEW.a_year
+AND R.semester = NEW.semester AND R.round = NEW.round)))
+THEN
+RAISE 'Course selected have clashing examinations';
+RETURN NULL;
+ELSE RETURN NEW;
+END IF;
 END; $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS exam_clash ON Register;
@@ -192,69 +184,68 @@ EXECUTE PROCEDURE exam_clashes();
 
 /* Trigger for Prerequisites fulfilment checking */
 CREATE OR REPLACE FUNCTION prereq()
-	RETURNS TRIGGER AS $$ BEGIN
-	IF EXISTS (
-			SELECT required_cid AS prereq
-			FROM Prerequisites
-			WHERE requiring_cid = NEW.cid
-			EXCEPT
-			SELECT cid
-			FROM Taken
-			WHERE sid = NEW.sid)
-	THEN RAISE 'Prerequisite not fulfilled';
-	RETURN NULL;
-	ELSE RETURN NEW;
-	END IF;
-	END; $$ LANGUAGE plpgsql;
+RETURNS TRIGGER AS $$ BEGIN
+IF EXISTS (
+SELECT required_cid AS prereq
+FROM Prerequisites
+WHERE requiring_cid = NEW.cid
+EXCEPT
+SELECT cid
+FROM Taken
+WHERE sid = NEW.sid)
+THEN RAISE 'Prerequisite not fulfilled';
+RETURN NULL;
+ELSE RETURN NEW;
+END IF;
+END; $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS pre_req ON Register;
 CREATE TRIGGER pre_req
-	BEFORE INSERT OR UPDATE ON Register
-	FOR EACH ROW
-	EXECUTE PROCEDURE prereq();
+BEFORE INSERT OR UPDATE ON Register
+FOR EACH ROW
+EXECUTE PROCEDURE prereq();
 
-	CREATE OR REPLACE FUNCTION dup_register()
-		RETURNS TRIGGER AS $$ BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM Accept
-				WHERE cid = NEW.cid
-				AND sid = NEW.sid
-				AND a_year = NEW.a_year
-				AND semester = NEW.semester
-		)
-		THEN RAISE 'Already Allocated Course';
-		RETURN NULL;
-		ELSE RETURN NEW;
-		END IF;
-		END; $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION dup_register()
+RETURNS TRIGGER AS $$ BEGIN
+IF EXISTS (SELECT 1
+FROM Accept
+WHERE cid = NEW.cid AND sid = NEW.sid
+AND a_year = NEW.a_year AND semester = NEW.semester)
+THEN RAISE 'Already Allocated Course';
+RETURN NULL;
+ELSE RETURN NEW;
+END IF;
+END; $$ LANGUAGE plpgsql;
 
-	CREATE TRIGGER dup_register
-		BEFORE INSERT OR UPDATE ON Register
-		FOR EACH ROW
-		EXECUTE PROCEDURE dup_register();
+DROP TRIGGER IF EXISTS dup_register ON Register;
+CREATE TRIGGER dup_register
+BEFORE INSERT OR UPDATE ON Register
+FOR EACH ROW
+EXECUTE PROCEDURE dup_register();
 
-	/* Trigger for Max courses */
-	CREATE OR REPLACE FUNCTION max_courses()
-		RETURNS TRIGGER AS $$ BEGIN
-		IF ((SELECT COUNT(*) FROM Register
-			WHERE a_year = new.a_year
-			AND semester = new.semester
-			AND round = new.round
-			AND sid = new.sid) +
-			(SELECT COUNT(*) FROM Accept
-				WHERE a_year = new.a_year
-				AND semester = new.semester
-				AND sid = new.sid)) > 6
-		THEN RAISE 'Course Limit Exceeded';
-		RETURN NULL;
-		ELSE RETURN NEW;
-		END IF;
-		END; $$ LANGUAGE plpgsql;
+/* Trigger for Max courses */
+CREATE OR REPLACE FUNCTION max_courses()
+RETURNS TRIGGER AS $$ BEGIN
+IF ((SELECT COUNT(*) FROM Register
+WHERE a_year = new.a_year
+AND semester = new.semester
+AND round = new.round
+AND sid = new.sid) +
+(SELECT COUNT(*) FROM Accept
+WHERE a_year = new.a_year
+AND semester = new.semester
+AND sid = new.sid)) > 6
+THEN RAISE 'Course Limit Exceeded';
+RETURN NULL;
+ELSE RETURN NEW;
+END IF;
+END; $$ LANGUAGE plpgsql;
 
-		CREATE TRIGGER max_courses
-		BEFORE INSERT OR UPDATE ON Register
-		FOR EACH ROW
-		EXECUTE PROCEDURE max_courses();
+DROP TRIGGER IF EXISTS max_courses ON Register;
+CREATE TRIGGER max_courses
+BEFORE INSERT OR UPDATE ON Register
+FOR EACH ROW
+EXECUTE PROCEDURE max_courses();
 
 /* use A1000001Z - A1000005Z for testing, A1000003Z has taken all prereq */
 INSERT INTO Administrators VALUES('B1000001X', 'ADMINISTRATOR1', 'password1');

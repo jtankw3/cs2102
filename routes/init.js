@@ -217,8 +217,6 @@ function initRouter(app) {
 			pool.query(sql_query2, (err, data2) => {
 				degree1 = data1.rows[0].dname1;
 				degree2 = data2.rows[0].dname2;
-				console.log("lol" + degree1);
-				console.log(degree2);
 				res.render('student_homepage', { title: 'Student Homepage' });
 			});
 		});
@@ -489,10 +487,6 @@ function initRouter(app) {
 				}
 		});
 	});
-
-	// GET for View degree requirements
-	var degree = 'Computer Science'
-	var sql_query2 = "SELECT required_cid, type FROM requirements WHERE name = '" + degree + "'";
 
 	app.get('/degree_requirements', function(req, res, next) {
 		check_login(res, 'student')
