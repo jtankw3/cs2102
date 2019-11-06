@@ -13,7 +13,6 @@ var acad_year;
 var semester;
 var reg_round;
 
-
 function initRouter(app) {
 	// Landing Page Get
 	app.get('/', function(req, res, next) {
@@ -24,19 +23,16 @@ function initRouter(app) {
 				res.redirect('/student_homepage')
 			}
 		} else {
-			pool.query(sql_query.query.get_period, (err, data) => {
-				if (data.rows[0] == null) {
-					res.render('index', {title: 'RegMod', message: 'There is no ongoing round.'})
+				getCurrentPeriod(app);
+				if (acad_year == null) {
+					res.render('login', {title: 'RegMod', message: 'There is no ongoing round.',
+					subtext: 'Do not share your password with anyone!', error: ''})
 				} else {
-					acad_year = data.rows[0].a_year;
-					semester = data.rows[0].semester;
-					reg_round = data.rows[0].a_year;
 					res.render('login', {title: 'RegMod Login', subtext: 'Do not share your password with anyone!', error: '',
 						message: "Currently ongoing: AY" + acad_year + " Sem " + semester + " Round " + reg_round });
 				}
-			});
-		}
-	});
+			}
+		});
 
 	// Landing Page Post
 	app.post('/', function(req, res, next) {
@@ -65,35 +61,6 @@ function initRouter(app) {
 				}
 			}
 		});
-	});
-
- 	 /* All select operations can use this template */
-  	app.get('/test_select', function(req, res, next) {
-  		pool.query(sql_query.query.find_user, (err, data) => {
-  			res.render('test_select', { title: 'Select', data: data.rows });
-  		});
-  	});
-
-	/* All insert operations can use this template */
-	app.get('/test_insert', function(req, res, next) {
-		res.render('test_insert', { title: 'Insert' });
-	});
-
-	//  have to add test_insert to the ejs form
-	app.post('/test_insert', function(req, res, next) {
-		// Retrieve Information
-		var uid  = req.body.uid;
-		var name    = req.body.name;
-		var password = req.body.password;
-
-	  pool.query(sql_query.query.add_user, [uid, name, password], (err, data) => {
-	    if(err) {
-	      console.error("Error in adding user");
-	      res.redirect('/test_insert');
-	    } else {
-	      res.redirect('/test_select');
-	    }
-	  });
 	});
 
 	// add all app.get app.post things here
@@ -136,7 +103,7 @@ function initRouter(app) {
 		var sid  = req.query.sid.toUpperCase();
 		var cid  = req.query.cid.toUpperCase();
 
-		pool.query(sql_query.query.delete_allocated_students,[cid, sid],
+		pool.query(sql_query.query.delete_allocated_student,[cid, sid],
 			(err, data) => {
 				res.redirect('/admin_allocate_select?cid=' + cid
 			+"&a_year=" + a_year + "&semester=" + sem);
@@ -160,7 +127,7 @@ function initRouter(app) {
 		var sid  = req.body.sid.toUpperCase();
 		var cid  = req.body.cid.toUpperCase();
 
-	  pool.query(sql_query.query.add_allocated_students,
+	  pool.query(sql_query.query.add_allocated_student,
 				[sid, cid, a_year, sem], (err, data) => {
 	    if(err) {
 	      console.error(err['detail']);
@@ -171,6 +138,57 @@ function initRouter(app) {
 		+"&a_year=" + a_year + "&semester=" + sem);
 			}
 		});
+	});
+
+	app.post('/admin_allocate_auto', function(req, res, next) {
+		getCurrentPeriod(app);
+			var cid = req.query.cid.toUpperCase();
+			var a_year = req.query.a_year.toUpperCase();
+			var sem = req.query.semester.toUpperCase();
+
+			console.log(cid, a_year, sem);
+			console.log(acad_year, semester)
+
+		if (acad_year == null || acad_year != a_year || semester != sem) {
+			console.log("not equal")
+			res.redirect('/admin_allocate_insert_error');
+		} else {
+		  pool.query(sql_query.query.calculate_priority,
+					[cid, acad_year, semester, reg_round], (err, data) => {
+		    if(err) {
+		      console.error(err);
+					res.render('admin_allocate_insert', {
+						subtext: "An error occured, please proceed with manual allocation."});
+				} else {
+					console.log(cid, acad_year, semester, reg_round, sql_query.query.calculate_priority);
+					console.log(data)
+					console.log(data.rows)
+					for (var i=0; i<data.rows.length; i++) {
+						console.log(data.rows[i].sid)
+						var err_detected = false;
+						pool.query(sql_query.query.add_allocated_student,
+								[data.rows[i].sid, cid, acad_year, semester], (err, data2) => {
+					    if(err) {
+					      console.error(err);
+								err_detected = true
+								res.render('admin_allocate_insert', {
+									subtext: "An error occured, please proceed with manual allocation."});
+							}
+						});
+						if (err_detected) {
+							break;
+						}
+					}
+					res.redirect('/admin_allocate_select?cid=' + cid +"&a_year="
+						+ acad_year + "&semester=" + semester);
+				}
+			});
+		}
+	});
+
+	// GET for Admin
+	app.get('/admin_allocate_insert_error', function(req, res, next) {
+		res.render('admin_allocate_insert_error');
 	});
 
 	// GET for Admin
@@ -391,5 +409,13 @@ function initRouter(app) {
 	});
 
 };
-
+function getCurrentPeriod(app) {
+	pool.query(sql_query.query.get_period, (err, data) => {
+		if(data.rows[0] != null) {
+			acad_year = data.rows[0].a_year;
+			semester = data.rows[0].semester;
+			reg_round = data.rows[0].round;
+		}
+	});
+}
 module.exports = initRouter;
