@@ -45,9 +45,7 @@ sql.query = {
 	create_register: "INSERT INTO register(a_year, semester, round, sid, cid) "
 	+ "VALUES($1, $2, $3, $4, $5)",
 	delete_register: 'DELETE FROM Register WHERE cid = $1 AND sid = $2 '
-	+ "AND a_year = $3 AND semester =$4 and round=$5"
-
-
+	+ "AND a_year = $3 AND semester =$4 and round=$5",
 
 	add_exam: 'INSERT INTO FinalExams VALUES($1,$2,$3,$4)'
 }
