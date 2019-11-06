@@ -10,6 +10,8 @@
 <h1>My Courses</h1>
 <table class="table">
     <thead>
+    <br>
+    <h4>Successfully registered courses for this semesters:</h4>
     <tr>
         <th scope="col">Course Code</th>
         <th scope="col">Course Name</th>
@@ -23,5 +25,24 @@
         </tr>
     <% } %>
     </tbody>
+</table>
+    <table class="table">
+        <thead>
+        <br>
+        <h4>All courses taken in previous semesters:</h4>
+        <tr>
+            <th scope="col">Course Code</th>
+            <th scope="col">Course Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% for(var i=0; i<data2.length; i++) { %>
+            <tr>
+                <td><%= data2[i].cid%></td>
+                <td><%= data2[i].name%></td>
+            </tr>
+        <% } %>
+        </tbody>
+    </table>
 </body>
 </html>
