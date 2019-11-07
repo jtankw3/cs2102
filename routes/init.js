@@ -581,6 +581,13 @@ function initRouter(app) {
 			error: '' });
 	});
 
+	// Get change password(student)
+	app.get('/change_spw', function(req, res, next) {
+		check_login(res, 'student')
+		res.render('change_spw', { title: 'Changing password',
+			error: '' });
+	});
+
 	// Post change password(admin)
 	app.post('/change_apw', function(req, res, next) {
 		// Retrieve information
@@ -590,12 +597,7 @@ function initRouter(app) {
 		var cnew_pw = req.body.cnew_pw;
 		var uid = sess.uid;
 
-		console.log([old_pw]);
-		console.log([new_pw]);
-		console.log([cnew_pw]);
-		console.log([uid]);
-
-		if (cnew_pw != new_pw) {
+		if (cnew_pw != new_pw || new_pw == '') {
 			res.render('change_apw', { title: 'Changing password',
 				error: 'Please make sure your passwords match. Please try again.'});
 		} else {
@@ -606,6 +608,33 @@ function initRouter(app) {
 				} else {
 					pool.query(sql_query.query.update_apw, [new_pw, sess.uid], (err, data) => {
 						res.render('change_apw', { title: 'Changing password',
+							error: 'Your password has been changed.'});
+					});
+				}
+			});
+		}
+	});
+
+	// Post change password(student)
+	app.post('/change_spw', function(req, res, next) {
+		// Retrieve information
+
+		var old_pw = req.body.old_pw;
+		var new_pw = req.body.new_pw;
+		var cnew_pw = req.body.cnew_pw;
+		var uid = sess.uid;
+
+		if (cnew_pw != new_pw || new_pw == '') {
+			res.render('change_spw', { title: 'Changing password',
+				error: 'Please make sure your passwords match. Please try again.'});
+		} else {
+			pool.query(sql_query.query.check_spw, [uid, old_pw], (err, data) => {
+				if (data.rows[0] == null) {
+					res.render('change_spw', { title: 'Changing password',
+						error: 'Please make sure your passwords match. Please try again.'});
+				} else {
+					pool.query(sql_query.query.update_spw, [new_pw, sess.uid], (err, data) => {
+						res.render('change_spw', { title: 'Changing password',
 							error: 'Your password has been changed.'});
 					});
 				}

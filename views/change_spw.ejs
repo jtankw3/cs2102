@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Page Title -->
+    <title>Student Change Password</title>
+
+    <%include partials/head%>
+</head>
+<body>
+<% include partials/menu %>
+<h1>Student: <%= title%></h1>
+<p style="color:red"> <%= error%></p>
+<form id="html_form" action="change_spw" role="form" method="post">
+    <div class="form-group">
+        <label for="old_pw">Old Password</label>
+        <input type="password" class="form-control" id="old_pw" name="old_pw" placeholder="Enter old password">
+    </div>
+    <div class="form-group">
+        <label for="new_pw">New Password</label>
+        <input type="password" class="form-control" id="new_pw" name="new_pw" placeholder="Enter new password">
+    </div>
+    <div class="form-group">
+        <label for="cnew_pw">Confirm New Password</label>
+        <input type="password" class="form-control" id="cnew_pw" name="cnew_pw" placeholder="Enter new password again">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    (function() {
+        window.addEventListener('load', function() {
+            var forms = [document.getElementById('html_form')];
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', check, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html>

@@ -61,7 +61,10 @@ sql.query = {
 	get_degrees: "SELECT dname1, dname2 FROM EnrolledStudents where sid=$1",
 
 	check_apw: "SELECT password FROM Administrators where aid = $1 AND password = $2",
-	update_apw: "UPDATE Administrators SET password = $1 WHERE aid = $2"
+	update_apw: "UPDATE Administrators SET password = $1 WHERE aid = $2",
+
+	check_spw: "SELECT password FROM EnrolledStudents where sid = $1 AND password = $2",
+	update_spw: "UPDATE EnrolledStudents SET password = $1 WHERE sid = $2"
 }
 
 module.exports = sql
