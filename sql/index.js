@@ -62,6 +62,11 @@ sql.query = {
 	+ "= cid WHERE requiring_cid = $1",
 	view_requirements: "SELECT required_cid, type FROM requirements WHERE name = $1",
 
+	create_degree: 'CALL add_requirements($1, $2, $3)',
+	update_degree: 'CALL update_requirements($1, $2, $3, $4)',
+	view_degree: 'SELECT * FROM Degrees',
+	search_degree: 'SELECT sid, name, e_year FROM EnrolledStudents WHERE dname1 = $1 OR dname2 = $1',
+	delete_degree: 'DELETE FROM Degrees WHERE name = $1',
 	get_degrees: "SELECT dname1, dname2 FROM EnrolledStudents where sid=$1",
 
 	check_apw: "SELECT password FROM Administrators where aid = $1 AND password = $2",

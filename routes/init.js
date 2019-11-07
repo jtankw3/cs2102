@@ -488,6 +488,89 @@ function initRouter(app) {
 		});
 	});
 
+	// GET for Degree view
+	app.get('/degree', function(req, res, next) {
+		check_login(res, 'admin')
+		pool.query(sql_query.query.view_degree, (err, data) => {
+			res.render('degree', { title: 'View Degrees', data: data.rows});
+		});
+	});
+	// GET for Degree Creation
+	app.get('/degree_creation', function(req, res, next) {
+		check_login(res, 'admin')
+		res.render('degree_creation', { title: 'Creating/Editing Degrees',
+			error: ''});
+	});
+
+	// POST for Degree Creation
+	app.post('/degree_creation', function(req, res, next) {
+		// Retrieve Information
+		var dname = req.body.dname.toUpperCase();
+		var required_cid = req.body.required_cid.toUpperCase();
+		var type = req.body.type.toUpperCase();
+		var newdname = req.body.newdname.toUpperCase();
+
+		if (newdname == '') {
+			pool.query(sql_query.query.create_degree, [dname, required_cid, type], (err, data) => {
+				if (err) {
+					console.err(err);
+					res.render('degree_creation', { title: 'Creating/Editing Degree',
+						error: 'An error occured, please check your inputs and try again.'});
+				} else {
+					res.redirect('/degree')
+				}
+			});
+		} else {
+			pool.query(sql_query.query.update_degree, [dname, required_cid, type, newdname], (err, data) => {
+				if (err) {
+					console.err(err);
+					res.render('degree_creation', { title: 'Creating/Editing Degree',
+						error: 'An error occured, please check your inputs and try again.'});
+				} else {
+					res.redirect('/degree')
+				}
+			});
+		}
+	});
+
+	// POST for degree deletion
+	app.post('/delete_degree', function(req, res, next) {
+		var dname  = req.query.dname.toUpperCase();
+
+		pool.query(sql_query.query.delete_degree,
+			[dname], (err, data) => {
+				res.redirect('/degree');
+			});
+	});
+
+	// GET for degree_search
+	app.get('/degree_search', function(req, res, next) {
+		check_login(res, 'admin')
+		res.render('degree_search', {message: '', error: '', course: '', data: []});
+	});
+
+	// POST for degree_search
+	app.post('/degree_search', function(req, res, next) {
+		var dname = req.body.dname.toUpperCase();
+		pool.query(sql_query.query.search_degree, [dname],
+			(err, data) => {
+				if (err) {
+					console.error(err)
+					res.render('degree_search', { message: '',
+						error: "An error occured, please check your input and try again.",
+						name: '', data: [] });
+				} else if (data.rows[0] == null) {
+					res.render('degree_search', {
+						message:'There are no students taking this degree', error: '',
+						name: dname, data: data.rows });
+				} else {
+
+					res.render('degree_search', { message:'', error: '',
+						name: dname, data: data.rows });
+				}
+			});
+	});
+
 	app.get('/degree_requirements', function(req, res, next) {
 		check_login(res, 'student')
 		var sid = sess.uid;

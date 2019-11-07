@@ -155,6 +155,22 @@ END IF;
 END;'
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE PROCEDURE update_requirements (
+dname varchar(50),
+required_cid varchar(7),
+type varchar(50),
+newdname varchar(50)) AS
+'BEGIN
+UPDATE Requirements SET name = newdname;
+UPDATE Requirements SET required_cid = required_cid;
+UPDATE Requirements SET type = type;
+
+IF NOT EXISTS (SELECT 1 FROM Degrees WHERE name = newdname)
+THEN INSERT INTO Degrees VALUES (newdname);
+DELETE FROM Degrees WHERE name = dname;
+END IF;
+END;'
+LANGUAGE plpgsql;
 
 /* Trigger for final exam clash checking */
 CREATE OR REPLACE FUNCTION exam_clashes()
