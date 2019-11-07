@@ -27,6 +27,10 @@ sql.query = {
 	delete_admins: 'DELETE FROM Administrators WHERE aid = $1',
 	add_exam: 'INSERT INTO FinalExams VALUES($1,$2,$3,$4)',
 
+	create_regperiod: 'INSERT INTO RegisterPeriods VALUES($1,$2,$3,$4,$5) ON CONFLICT(a_year, semester, round) DO UPDATE SET a_year = $1, semester = $2, round = $3, s_time = $4, e_time = $5',
+	view_regperiod: 'SELECT * FROM RegisterPeriods',
+	delete_regperiod: 'DELETE FROM RegisterPeriods WHERE a_year = $1 AND semester = $2 AND round = $3',
+
 	calculate_priority: "With CoreReq AS (SELECT * FROM Requirements WHERE type = 'core' and required_cid = $1), "
 	+ "RemainingQuota as (SELECT quota - (SELECT COUNT(*) FROM Accept WHERE cid = $1 "
 	+ "AND a_year=$2 and semester = $3) "

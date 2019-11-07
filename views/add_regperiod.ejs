@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('admin_nav') %>
+
+    <!-- Page Title -->
+    <title>Add New Registration Period</title>
+
+    <!-- CSS for Styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <!-- JavaScript for Interactivity -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <!-- ADDED JavaScript -->
+    <!-- <script src="javascripts/insertcourseScript.js"></script> -->
+
+</head>
+<body>
+
+<h1>Admin: <%= title%></h1>
+<p style="color:red"> <%= error%></p>
+<form id="html_form" action="add_regperiod" role="form" method="post">
+    <div class="form-group">
+        <label for="a_year">Academic Year</label>
+        <input type="text" class="form-control" id="a_year" name="a_year" placeholder="Enter academic year">
+    </div>
+    <div class="form-group">
+        <label for="semester">Semester</label>
+        <input type="text" class="form-control" id="semester" name="semester" placeholder="Enter academic semester">
+    </div>
+    <div class="form-group">
+        <label for="round">Round</label>
+        <input type="text" class="form-control" id="round" name="round" placeholder="Enter semester round">
+    </div>
+    <div class="form-group">
+        <label for="s_time">Start Date</label>
+        <input type="text" class="form-control" id="s_time" name="s_time" aria-describedby="sHelp" placeholder="Enter start date and time">
+        <small id="sHelp" class="form-text text-muted">E.g. YYYY-MM-DD 14:00:00</small>
+    </div>
+    <div class="form-group">
+        <label for="e_time">End Date</label>
+        <input type="text" class="form-control" id="e_time" name="e_time" aria-describedby="eHelp" placeholder="Enter end date and time">
+        <small id="eHelp" class="form-text text-muted">E.g. YYYY-MM-DD 16:00:00</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    (function() {
+        window.addEventListener('load', function() {
+            var forms = [document.getElementById('html_form')];
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', check, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html>

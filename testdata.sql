@@ -143,11 +143,18 @@ BEFORE INSERT OR UPDATE ON Degrees
 FOR EACH ROW
 EXECUTE FUNCTION deg_func();
 
-DROP TRIGGER IF EXISTS deg_trig ON Degrees;
-CREATE TRIGGER deg_trig
-BEFORE INSERT OR UPDATE ON Degrees
-FOR EACH ROW
-EXECUTE FUNCTION deg_func();
+CREATE OR REPLACE PROCEDURE add_requirements (
+dname varchar(50),
+required_cid varchar(7),
+type varchar(50)) AS
+'BEGIN
+INSERT INTO Requirements VALUES (dname, required_cid, type);
+IF NOT EXISTS (SELECT 1 FROM Degrees WHERE name = dname)
+THEN INSERT INTO Degrees VALUES (dname);
+END IF;
+END;'
+LANGUAGE plpgsql;
+
 
 /* Trigger for final exam clash checking */
 CREATE OR REPLACE FUNCTION exam_clashes()

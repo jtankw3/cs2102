@@ -642,6 +642,54 @@ function initRouter(app) {
 		}
 	});
 
+	// GET for registration period
+	app.get('/regperiod', function(req, res, next) {
+		check_login(res, 'admin')
+		pool.query(sql_query.query.view_regperiod, (err, data) => {
+			res.render('regperiod', { title: 'View Registration Period', data: data.rows });
+		});
+	});
+
+	// POST for registration period
+	app.post('/delete_regperiod', function(req, res, next) {
+		var a_year = req.query.a_year
+		var semester = req.query.semester
+		var round = req.query.round;
+		pool.query(sql_query.query.delete_regperiod,[a_year,semester,round],
+			(err, data) => {
+				res.redirect('/regperiod')
+			});
+	});
+
+
+	// Get add registration period
+	app.get('/add_regperiod', function(req, res, next) {
+		check_login(res, 'admin')
+		res.render('add_regperiod', { title: 'Adding new registration period',
+			error: '' });
+	});
+
+	// Post add registration period
+	app.post('/add_regperiod', function(req, res, next) {
+		check_login(res, 'admin')
+		// Retrieve Information
+		var a_year  = req.body.a_year;
+		var semester = req.body.semester;
+		var round = req.body.round;
+		var s_time = req.body.s_time;
+		var e_time = req.body.e_time;
+
+		pool.query(sql_query.query.create_regperiod, [a_year, semester, round, s_time, e_time], (err, data) => {
+			if (err) {
+				console.error(err);
+				res.render('add_regperiod', { title: 'Adding new registration period',
+					error: 'An error occured, please check your inputs and try again.'});
+			} else {
+				res.redirect('/regperiod')
+			}
+		});
+	});
+
 }
 
 function getCurrentPeriod(req, res, callback) {
