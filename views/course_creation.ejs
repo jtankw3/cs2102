@@ -23,6 +23,7 @@
 <h1>Admin: <%= title%></h1>
 <p style="color:red"> <%= error%></p>
 <form id="html_form" action="course_creation" role="form" method="post">
+  <h4>Course Details</h4>
     <div class="form-group">
         <label for="cid">Course ID</label>
         <input type="text" class="form-control" id="cid" name="cid" aria-describedby="cidHelp" placeholder="Enter course ID">
@@ -40,6 +41,7 @@
         <label for="credits">Course Credit</label>
         <input type="text" class="form-control" id="credits" name="credits" placeholder="Enter course credit">
     </div>
+    <h4>Final Examination Details (Optional)</h4>
     <div class="form-group">
         <label for="exam_date">Final Exam Date</label>
         <input type="text" class="form-control" id="exam_date" name="exam_date" aria-describedby="examHelp" placeholder="Enter final exam date">

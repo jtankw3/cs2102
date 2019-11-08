@@ -49,7 +49,9 @@ CREATE TABLE Requirements(
 	required_cid varchar(7),
 	type varchar(50) NOT NULL,
 	PRIMARY KEY(name, required_cid),
-	FOREIGN KEY(name) REFERENCES Degrees(name) DEFERRABLE INITIALLY DEFERRED,
+	FOREIGN KEY(name) REFERENCES Degrees(name)
+	ON DELETE CASCADE ON UPDATE CASCADE
+	DEFERRABLE INITIALLY DEFERRED,
 	FOREIGN KEY(required_cid) REFERENCES Courses(cid)
 );
 
@@ -61,8 +63,10 @@ CREATE TABLE EnrolledStudents(
 	e_year integer NOT NULL,
 	dname1 varchar(20) NOT NULL,
 	dname2 varchar(20),
-	FOREIGN KEY(dname1) REFERENCES Degrees(name),
+	FOREIGN KEY(dname1) REFERENCES Degrees(name)
+	ON UPDATE CASCADE,
 	FOREIGN KEY(dname2) REFERENCES Degrees(name)
+	ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS RegisterPeriods CASCADE;
@@ -139,7 +143,7 @@ END; $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS deg_trig ON Degrees;
 CREATE TRIGGER deg_trig
-BEFORE INSERT OR UPDATE ON Degrees
+BEFORE INSERT ON Degrees
 FOR EACH ROW
 EXECUTE FUNCTION deg_func();
 
@@ -151,23 +155,6 @@ type varchar(50)) AS
 INSERT INTO Requirements VALUES (dname, required_cid, type);
 IF NOT EXISTS (SELECT 1 FROM Degrees WHERE name = dname)
 THEN INSERT INTO Degrees VALUES (dname);
-END IF;
-END;'
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE PROCEDURE update_requirements (
-dname varchar(50),
-required_cid varchar(7),
-type varchar(50),
-newdname varchar(50)) AS
-'BEGIN
-UPDATE Requirements SET name = newdname;
-UPDATE Requirements SET required_cid = required_cid;
-UPDATE Requirements SET type = type;
-
-IF NOT EXISTS (SELECT 1 FROM Degrees WHERE name = newdname)
-THEN INSERT INTO Degrees VALUES (newdname);
-DELETE FROM Degrees WHERE name = dname;
 END IF;
 END;'
 LANGUAGE plpgsql;
