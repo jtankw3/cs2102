@@ -156,9 +156,6 @@ function initRouter(app) {
 			var a_year = req.query.a_year.toUpperCase();
 			var sem = req.query.semester.toUpperCase();
 
-			console.log(cid, a_year, sem);
-			console.log(acad_year, semester)
-
 			if (acad_year == null || acad_year != a_year || semester != sem) {
 				res.redirect('/admin_allocate_insert_error');
 			} else {
@@ -167,7 +164,7 @@ function initRouter(app) {
 					if(err) {
 						console.error(err);
 						res.render('admin_allocate_insert', {
-							subtext: "An error occured, please proceed with manual allocation."});
+							error: "An error occured, please proceed with manual allocation."});
 					} else {
 						for (var i=0; i<data.rows.length; i++) {
 							var err_detected = false;
@@ -177,7 +174,7 @@ function initRouter(app) {
 									console.error(err);
 									err_detected = true
 									res.render('admin_allocate_insert', {
-										subtext: "An error occured, please proceed with manual allocation."});
+										error: "An error occured, please proceed with manual allocation."});
 								}
 							});
 							if (err_detected) {

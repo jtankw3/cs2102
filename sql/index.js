@@ -31,18 +31,22 @@ sql.query = {
 	view_regperiod: 'SELECT * FROM RegisterPeriods',
 	delete_regperiod: 'DELETE FROM RegisterPeriods WHERE a_year = $1 AND semester = $2 AND round = $3',
 
-	calculate_priority: "With CoreReq AS (SELECT * FROM Requirements WHERE type = 'core' and required_cid = $1), "
-	+ "RemainingQuota as (SELECT quota - (SELECT COUNT(*) FROM Accept WHERE cid = $1 "
-	+ "AND a_year=$2 and semester = $3) "
+	calculate_priority: "With CoreReq AS (SELECT * FROM Requirements WHERE "
+	+ "type = 'core' and required_cid = $1), "
+	+ "RemainingQuota as (SELECT quota - (SELECT COUNT(*) FROM Accept "
+	+ "WHERE cid = $1 AND a_year=$2 and semester = $3) "
 	+ "FROM Courses WHERE cid = $1) "
 	+ "SELECT E1.sid, (COALESCE((SELECT 2 FROM CoreReq WHERE name = E1.dname1), "
-	+ "(SELECT 1 FROM CoreReq WHERE name = E1.dname2), 0) + "
-	+ "(SELECT COUNT(*) FROM Accept WHERE sid = E1.sid AND a_year = 2019 AND semester = 1) - "
+	+ "(SELECT 1 FROM CoreReq WHERE name = E1.dname2), 0) +"
+	+ "(SELECT COUNT(*) FROM Accept WHERE sid = E1.sid AND a_year = $2 AND semester = $3) - "
 	+ "(SELECT e_year FROM EnrolledStudents E2 WHERE E2.sid = E1.sid)) AS Priority "
 	+ "FROM (SELECT * FROM Register WHERE (sid, cid) not in (select sid, cid from accept)) R1 NATURAL JOIN EnrolledStudents E1 "
 	+ "WHERE R1.cid = $1 AND a_year = $2 AND semester = $3 AND round = $4 "
-	+ "ORDER BY Priority DESC, RANDOM() "
-	+ "LIMIT (SELECT * FROM RemainingQuota)",
+	+ "ORDER BY Priority DESC, RANDOM()"
+	+ "LIMIT CASE WHEN"
+	+ "(SELECT * FROM RemainingQuota) < 0 THEN 0"
+	+ "ELSE (SELECT * FROM RemainingQuota)"
+	+ "END;",
 
 	view_register: "SELECT R.cid, C.name, C.credits FROM register R JOIN courses C "
 	+ "ON R.cid = C.cid WHERE a_year=$1 AND semester=$2 AND round = $3"
