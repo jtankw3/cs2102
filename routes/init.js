@@ -12,8 +12,6 @@ var sess = {};
 var acad_year;
 var semester;
 var reg_round;
-var degree1;
-var degree2;
 
 function initRouter(app) {
 	// Landing Page Get
@@ -162,7 +160,6 @@ function initRouter(app) {
 			console.log(acad_year, semester)
 
 			if (acad_year == null || acad_year != a_year || semester != sem) {
-				console.log("not equal")
 				res.redirect('/admin_allocate_insert_error');
 			} else {
 				pool.query(sql_query.query.calculate_priority,
@@ -187,8 +184,8 @@ function initRouter(app) {
 								break;
 							}
 						}
-						res.redirect('/admin_allocate_select?cid=' + cid +"&a_year="
-							+ acad_year + "&semester=" + semester);
+						setTimeout(() => { res.redirect('/admin_allocate_select?cid='
+						+ cid +"&a_year=" + acad_year + "&semester=" + semester); }, 1000);
 					}
 				});
 			}
