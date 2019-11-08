@@ -16,7 +16,6 @@
         <th scope="col">Course Code</th>
         <th scope="col">Course Name</th>
         <th scope="col">Credits</th>
-        <th scope="col">Drop</th>
     </tr>
     </thead>
     <tbody>
@@ -26,7 +25,7 @@
             <td><%= data[i].name%></td>
             <td><%= data[i].credits%></td>
             <td><form action="drop_course?cid=<%= data[i].cid %>" method="post">
-            <input type="submit" name="drop_course" value="X" /></form></td>
+            <input type="submit" name="drop_course" value="Drop" /></form></td>
         </tr>
     <% } %>
     </tbody>
