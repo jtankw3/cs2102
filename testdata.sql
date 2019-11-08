@@ -131,7 +131,7 @@ CREATE TABLE FinalExams(
 CREATE OR REPLACE FUNCTION deg_func()
 RETURNS TRIGGER AS $$ BEGIN
 IF EXISTS (
-SELECT name
+SELECT 1
 FROM Requirements
 WHERE name = NEW.name)
 THEN RETURN NEW;
@@ -158,6 +158,25 @@ THEN INSERT INTO Degrees VALUES (dname);
 END IF;
 END;'
 LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION req_del_func()
+RETURNS TRIGGER AS $$ BEGIN
+IF NOT EXISTS (
+SELECT 1
+FROM Requirements
+WHERE name = OLD.name)
+THEN RAISE
+'Degree should at least have one requirement';
+RETURN NULL;
+END IF;
+RETURN OLD;
+END; $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS req_del_trig ON Requirements;
+CREATE TRIGGER req_del_trig
+AFTER DELETE ON Requirements
+FOR EACH ROW
+EXECUTE FUNCTION req_del_func();
 
 /* Trigger for final exam clash checking */
 CREATE OR REPLACE FUNCTION exam_clashes()
