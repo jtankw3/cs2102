@@ -275,15 +275,31 @@ function initRouter(app) {
 	app.get('/courses', function(req, res, next) {
 		check_login(res, 'admin')
 		pool.query(sql_query.query.view_course, (err, data) => {
-			res.render('courses', { title: 'View Courses', data: data.rows });
+			res.render('courses', { title: 'View Courses',
+			data: data.rows });
 		});
 	});
+
+	// GET for Courses
+	app.get('/courses_error', function(req, res, next) {
+		check_login(res, 'admin')
+		pool.query(sql_query.query.view_course, (err, data) => {
+			res.render('courses_error', { title: 'View Courses',
+			data: data.rows });
+		});
+	});
+
 
 	// POST for Courses deletion
 	app.post('/delete_course', function(req, res, next) {
 		pool.query(sql_query.query.delete_course,[req.query.cid],
 			(err, data) => {
-				res.redirect('/courses')
+				if(err) {
+					console.error(err)
+					res.redirect('/courses_error')
+				} else {
+				 	res.redirect('/courses')
+				}
 			});
 	});
 
@@ -384,6 +400,9 @@ function initRouter(app) {
 		var sid = req.query.sid.toUpperCase();
 		pool.query(sql_query.query.drop_students,[sid],
 			(err, data) => {
+				if (err) {
+					console.error(err);
+				}
 				res.redirect('/student')
 			});
 	});

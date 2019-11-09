@@ -3,7 +3,7 @@
 <head>
     <%- include('admin_nav') %>
     <!-- Page Title -->
-    <title>View Students</title>
+    <title>View Courses</title>
 
     <!-- CSS for Styling -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -15,27 +15,31 @@
 </head>
 <body>
 <h1>Admin: <%= title%></h1>
+<p style="color: red">Cannot delete course with students still registered.</p>
 <table class="table">
     <thead>
     <tr>
-        <th scope="col">Student ID</th>
-        <th scope="col">Student Name</th>
-        <th scope="col">Enrolled Year</th>
-        <th scope="col">Degree Name 1</th>
-        <th scope="col">Degree Name 2</th>
+        <th scope="col">Course ID</th>
+        <th scope="col">Course Name</th>
+        <th scope="col">Quota</th>
+        <th scope="col">Credit</th>
+        <th scope="col">Admin ID</th>
+        <th scope="col">Final Exam</th>
     </tr>
     </thead>
     <body>
     <% for(var i=0; i<data.length; i++) { %>
         <tr>
-            <td><%= data[i].sid%></td>
+            <td><%= data[i].cid%></td>
             <td><%= data[i].name%></td>
-            <td><%= data[i].e_year%></td>
-            <td><%= data[i].dname1%></td>
-            <td><%= data[i].dname2%></td>
-            <td><button type="button" onclick="location.href='/student_creation' ">Edit</button></td>
-    <td><form action="drop_student?sid=<%= data[i].sid %>" method="post">
-    <input type="submit" name="drop_student" value="Drop" /></form></td>
+            <td><%= data[i].quota%></td>
+            <td><%= data[i].credits%></td>
+            <td><%= data[i].c_admin%></td>
+            <td><%= data[i].s_time%></td>
+            <td><button type="button" onclick="location.href='/course_creation' ">Edit</button></td>
+    <td><form action="delete_course?cid=<%= data[i].cid %>&name=<%= data[i].name %>&quota=<%= data[i].quota%>&credits=<%= data[i].credits%>&c_admin=<%= data[i].c_admin%>" method="post">
+    <input type="submit" name="delete_course" value="Delete" /></form></td>
+
 
         </tr>
     <% } %>
