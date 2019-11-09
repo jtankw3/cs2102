@@ -15,6 +15,7 @@
 </head>
 <body>
 <h1>Admin: <%= title%></h1>
+<p style="color:red"> <%= error%></p>
 <table class="table">
     <thead>
     <tr>
@@ -26,7 +27,7 @@
         <tr>
            <td><%= data[i].name%></td>
             <td><button type="button" onclick="location.href='/degree_creation' ">Edit</button></td>
-    <td><form action="delete_degree?name=<%= data[i].name %>" method="post">
+    <td><form action="delete_degree?dname=<%= data[i].name %>" method="post">
     <input type="submit" name="delete_degree" value="Delete" /></form></td>
         </tr>
     <% } %>

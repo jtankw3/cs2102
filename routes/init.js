@@ -422,7 +422,7 @@ function initRouter(app) {
 
 		pool.query(sql_query.query.create_admin, [aid,name], (err, data) => {
 			if (err) {
-				console.err(err);
+				console.error(err);
 				res.render('admin_creation', { title: 'Creating/Editing Administrators',
 				error: 'An error occured, please check your inputs and try again.'});
 			} else {
@@ -505,7 +505,8 @@ function initRouter(app) {
 	app.get('/degree', function(req, res, next) {
 		check_login(res, 'admin')
 		pool.query(sql_query.query.view_degree, (err, data) => {
-			res.render('degree', { title: 'View Degrees', data: data.rows});
+			res.render('degree', { title: 'View Degrees', error:'',
+			data: data.rows});
 		});
 	});
 	// GET for Degree Creation
@@ -522,11 +523,12 @@ function initRouter(app) {
 		var required_cid = req.body.required_cid.toUpperCase();
 		var type = req.body.type.toUpperCase();
 		var newdname = req.body.newdname.toUpperCase();
+		console.log(dname, required_cid, type, newdname)
 
 		if (newdname == '') {
 			pool.query(sql_query.query.create_degree, [dname, required_cid, type], (err, data) => {
 				if (err) {
-					console.err(err);
+					console.error(err);
 					res.render('degree_creation', { title: 'Creating/Editing Degree',
 						error: 'An error occured, please check your inputs and try again.'});
 				} else {
@@ -536,7 +538,7 @@ function initRouter(app) {
 		} else {
 			pool.query(sql_query.query.update_degree, [dname, required_cid, type, newdname], (err, data) => {
 				if (err) {
-					console.err(err);
+					console.error(err);
 					res.render('degree_creation', { title: 'Creating/Editing Degree',
 						error: 'An error occured, please check your inputs and try again.'});
 				} else {
@@ -552,7 +554,15 @@ function initRouter(app) {
 
 		pool.query(sql_query.query.delete_degree,
 			[dname], (err, data) => {
-				res.redirect('/degree');
+				if (err) {
+					console.error(err)
+					pool.query(sql_query.query.view_degree, (err, data) => {
+						res.render('degree', { title: 'View Degrees',
+						error: 'Cannot delete degree with students still enrolled', data: data.rows});
+					});
+				} else {
+						res.redirect('/degree');
+				}
 			});
 	});
 
@@ -714,7 +724,6 @@ function initRouter(app) {
 	// Post change password(student)
 	app.post('/change_spw', function(req, res, next) {
 		// Retrieve information
-
 		var old_pw = req.body.old_pw;
 		var new_pw = req.body.new_pw;
 		var cnew_pw = req.body.cnew_pw;
@@ -742,7 +751,8 @@ function initRouter(app) {
 	app.get('/regperiod', function(req, res, next) {
 		check_login(res, 'admin')
 		pool.query(sql_query.query.view_regperiod, (err, data) => {
-			res.render('regperiod', { title: 'View Registration Period', data: data.rows });
+			res.render('regperiod', { title: 'View Registration Period', error: '',
+			data: data.rows });
 		});
 	});
 
@@ -753,7 +763,15 @@ function initRouter(app) {
 		var round = req.query.round;
 		pool.query(sql_query.query.delete_regperiod,[a_year,semester,round],
 			(err, data) => {
+				if (err) {
+					console.error(err)
+					pool.query(sql_query.query.view_regperiod, (err, data) => {
+						res.render('regperiod', { title: 'View Registration Period',
+						error: 'Cannot delete registration period with activity.', data: data.rows });
+					});
+				} else {
 				res.redirect('/regperiod')
+				}
 			});
 	});
 
