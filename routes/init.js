@@ -233,15 +233,15 @@ function initRouter(app) {
 	app.post('/course_creation', function(req, res, next) {
 		check_login(res, 'admin')
 		// Retrieve Information
-		var cid  = req.body.cid;
-		var c_name = req.body.c_name;
-		var c_quota = req.body.c_quota;
-		var credits = req.body.credits;
-		var date = req.body.exam_date;
-		var stime = req.body.s_time;
-		var etime = req.body.e_time;
-		var venue = req.body.venue;
-		var c_admin = sess.uid;
+		var cid  = req.body.cid.toUpperCase();
+		var c_name = req.body.c_name.toUpperCase();
+		var c_quota = req.body.c_quota.toUpperCase();
+		var credits = req.body.credits.toUpperCase();
+		var date = req.body.exam_date.toUpperCase();
+		var stime = req.body.s_time.toUpperCase();
+		var etime = req.body.e_time.toUpperCase();
+		var venue = req.body.venue.toUpperCase();
+		var c_admin = sess.uid.toUpperCase();
 
 		var finalexam_s_time = date + " " + stime;
 		var finalexam_e_time = date + " " + etime;

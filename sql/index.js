@@ -32,7 +32,7 @@ sql.query = {
 	delete_regperiod: 'DELETE FROM RegisterPeriods WHERE a_year = $1 AND semester = $2 AND round = $3',
 
 	calculate_priority: "With CoreReq AS (SELECT * FROM Requirements WHERE "
-	+ "type = 'core' and required_cid = $1), "
+	+ "type = 'CORE' and required_cid = $1), "
 	+ "RemainingQuota as (SELECT quota - (SELECT COUNT(*) FROM Accept "
 	+ "WHERE cid = $1 AND a_year=$2 and semester = $3) "
 	+ "FROM Courses WHERE cid = $1) "
